@@ -18,16 +18,6 @@ LifestyleNews <- read_csv("OnlineNewsPopularity.csv", show_col_types = FALSE) %>
   select(shares, n_tokens_content, num_imgs, num_videos,
          global_rate_positive_words, global_subjectivity, is_weekend)
 LifestyleNews$is_weekend <- factor(LifestyleNews$is_weekend)
-# Create binary shares variable
-binshares <- c()
-for (i in seq_len(nrow(LifestyleNews))){
-  if (LifestyleNews$shares[i] >= 1400){
-    binshares[i] <- 1
-  }else{
-    binshares[i] <- 0
-  }
-}
-LifestyleNews$binshares <- factor(binshares)
 ```
 
 ```{r check correlation, echo=TRUE, eval=TRUE}
@@ -42,12 +32,6 @@ set.seed(1)
 trainIndex <- createDataPartition(LifestyleNews$shares, p = 0.7, list = FALSE)
 train <- LifestyleNews[trainIndex, ]
 test <- LifestyleNews[-trainIndex, ]
-# Train and test set with continuous shares
-lmtrain <- train %>% select(-binshares)
-lmtest <- test %>% select(-binshares)
-# Train and test set with binary shares
-bintrain <- train %>% select(-shares)
-bintest <- test %>% select(-shares)
 ```
 
 # EDA  
@@ -63,14 +47,12 @@ apply(X = select(train, shares:global_subjectivity), MARGIN = 2,
       })
 ```
 
-From numeric summary table, the response **shares** may have right-skewed distribution. The standard deviation of **shares** is unusually high, indicating that there are outliers. The n_tokens_content, num_imgs, and num_videos predictors may have right-skewed distributions. The rate_positive_words and global_subjectivity may have the symmtric distribution.  
+From numeric summary table, the response **shares** may have right-skewed distribution. The standard deviation of **shares** is unusually high, indicating that there are some outliers. The n_tokens_content, num_imgs, and num_videos predictors may have right-skewed distributions. The global_rate_positive_words and global_subjectivity may have the symmtric distribution.  
 
 ## Contingency Table  
 
 ```{r contingency table, echo=TRUE, eval=TRUE}
 table(train$is_weekend)
-table(train$binshares)
-table(train$is_weekend, train$binshares)
 ```
 
 From the contingency table, there are much more articles published on weekday.  
@@ -81,10 +63,6 @@ From the contingency table, there are much more articles published on weekday.
 g <- ggplot(data = train, aes(x = is_weekend))
 g + geom_bar(fill = "Red", color = "Blue") +
   labs(title = "Bar Plot of is_weekend")
-
-g <- ggplot(data = train, aes(x = binshares))
-g + geom_bar(fill = "Red", color = "Blue") +
-  labs(title = "Bar Plot of Binshares")
 ```
 
 ```{r boxplot, echo=TRUE, eval=TRUE}
@@ -111,25 +89,51 @@ g + geom_point(aes(color = is_weekend)) +
 
 # Modeling  
 
+## Baisc Idea of Linear Regression  
+
+Regression models allow easy prediction of response and inference. Linear regression is that we model a response as a linear function of some predictors. Model fit by minimizing the sum of squared residuals.  
+
 ```{r linear regression, echo=TRUE, eval=TRUE}
-lmfit <- train(shares ~.,
-               data = lmtrain,
-               method = "lm")
-lmfit
-lmpred <- predict(lmfit, newdata = lmtest) 
-postResample(lmpred, lmtest$shares)
+# Fit linear model
+mod <- lm(shares ~ (n_tokens_content + num_imgs + num_videos + 
+                      global_rate_positive_words + global_subjectivity + 
+                      is_weekend)^2 ,data =  train)
+# Use forward selection to  choose model
+forward_mod <- step(mod, direction = "forward")
+
+fit <- train(shares ~ (n_tokens_content + num_imgs + num_videos + 
+                         global_rate_positive_words + global_subjectivity + 
+                         is_weekend)^2,
+             data = train,
+             method = "lm",
+             preProcess = c("center", "scale"),
+             trControl = trainControl(method = "cv", number = 5))
+fit
+pred <- predict(fit, newdata = test) 
+postResample(pred, test$shares)
 ```
 
+## Random Forest  
+Since the response is continuous, we choose to use regression tree.  
+
+The bootstrapping is that we resample from data or a fitted model and apply method or estimation to each resample. We see how the model or method behave.  
+
+For Bootstrap Aggregation(Bagged) for regression tree, we create a bootstrap sample, train tree on the sample, repeat B = 1000 times, and average over these predictions as final prediction.  
+
+Random forest follows Bootstrap Aggregation idea. We will create multiple trees from bootstrap samples and average the results. But, we will use a random subset of predictors for each bootstrap tree fit instead of using all predictors. It may make bagged trees predictions more correlated, which can help with reduction of variation.  
+
 ```{r random forest, echo=TRUE, eval=TRUE}
-RFfit <- train(shares ~ ., 
-                data = lmtrain, 
-                method = "rf", 
-                trControl = trainControl(method = "cv", number = 5), 
-                preProcess = c("center", "scale"),
+RFfit <- train(shares ~ (n_tokens_content + num_imgs + num_videos + 
+                         global_rate_positive_words + global_subjectivity + 
+                         is_weekend)^2, 
+               data = train, 
+               method = "rf", 
+               trControl = trainControl(method = "cv", number = 5), 
+               preProcess = c("center", "scale"),
                tuneGrid = data.frame(mtry = 1:6))
 RFfit
-RFpred <- predict(RFfit, newdata = lmtest) 
-postResample(RFpred, lmtest$shares)
+RFpred <- predict(RFfit, newdata = test) 
+postResample(RFpred, test$shares)
 ```
 
 ```{r}
