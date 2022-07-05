@@ -1,0 +1,138 @@
+---
+title: "ST558 Project2"
+author: "Shan Luo, Chengxi Zhou"
+date: '2022-07-03'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(caret)
+library(matrixStats)
+library(ggplot2)
+```
+
+```{r read in and subset data, echo=TRUE, eval=TRUE}
+LifestyleNews <- read_csv("OnlineNewsPopularity.csv", show_col_types = FALSE) %>%
+  filter(data_channel_is_lifestyle == 1) %>%
+  select(shares, n_tokens_content, num_imgs, num_videos,
+         global_rate_positive_words, global_subjectivity, is_weekend)
+LifestyleNews$is_weekend <- factor(LifestyleNews$is_weekend)
+# Create binary shares variable
+binshares <- c()
+for (i in seq_len(nrow(LifestyleNews))){
+  if (LifestyleNews$shares[i] >= 1400){
+    binshares[i] <- 1
+  }else{
+    binshares[i] <- 0
+  }
+}
+LifestyleNews$binshares <- factor(binshares)
+```
+
+```{r check correlation, echo=TRUE, eval=TRUE}
+cor(select(LifestyleNews ,shares, n_tokens_content, num_imgs, num_videos,
+           global_rate_positive_words, global_subjectivity))
+```
+
+All of numeric variables have low correlations.  
+
+```{r split train and test data, echo=TRUE, eval=TRUE}
+set.seed(1)
+trainIndex <- createDataPartition(LifestyleNews$shares, p = 0.7, list = FALSE)
+train <- LifestyleNews[trainIndex, ]
+test <- LifestyleNews[-trainIndex, ]
+# Train and test set with continuous shares
+lmtrain <- train %>% select(-binshares)
+lmtest <- test %>% select(-binshares)
+# Train and test set with binary shares
+bintrain <- train %>% select(-shares)
+bintest <- test %>% select(-shares)
+```
+
+# EDA  
+
+## Numeric Summary Table  
+
+```{r numeric summaries, echo=TRUE, eval=TRUE}
+apply(X = select(train, shares:global_subjectivity), MARGIN = 2,
+      FUN = function(x) {
+        summaries <- c(min(x), mean(x), median(x), max(x), sd(x), IQR(x))
+        names(summaries) <- c("Min", "Mean", "Median", "Max", "Sd", "IQR")
+        summaries
+      })
+```
+
+From numeric summary table, the response **shares** may have right-skewed distribution. The standard deviation of **shares** is unusually high, indicating that there are outliers. The n_tokens_content, num_imgs, and num_videos predictors may have right-skewed distributions. The rate_positive_words and global_subjectivity may have the symmtric distribution.  
+
+## Contingency Table  
+
+```{r contingency table, echo=TRUE, eval=TRUE}
+table(train$is_weekend)
+table(train$binshares)
+table(train$is_weekend, train$binshares)
+```
+
+From the contingency table, there are much more articles published on weekday.  
+
+## Bar Plot  
+
+```{r barplot, echo=TRUE, eval=TRUE}
+g <- ggplot(data = train, aes(x = is_weekend))
+g + geom_bar(fill = "Red", color = "Blue") +
+  labs(title = "Bar Plot of is_weekend")
+
+g <- ggplot(data = train, aes(x = binshares))
+g + geom_bar(fill = "Red", color = "Blue") +
+  labs(title = "Bar Plot of Binshares")
+```
+
+```{r boxplot, echo=TRUE, eval=TRUE}
+g <- ggplot(data = train, aes(x = is_weekend, y = shares))
+g + geom_boxplot() +
+  geom_jitter(aes(color = is_weekend)) + 
+  labs()
+```
+
+
+```{r histograms, echo=TRUE, eval=TRUE}
+g <- ggplot(data = train, aes(x = shares))
+g + geom_histogram(bins = 30, aes(fill = is_weekend)) +
+  labs(x = "Number of Shares",
+       title = "Histogram of Shares") +
+  scale_fill_discrete(name = "Weekend Published", labels = c("No", "Yes"))
+```
+
+```{r scatterplot, echo=TRUE, eval=TRUE}
+g <- ggplot(data = train, aes(x = n_tokens_content, y = shares))
+g + geom_point(aes(color = is_weekend)) +
+  geom_smooth(method = "lm")
+```
+
+# Modeling  
+
+```{r linear regression, echo=TRUE, eval=TRUE}
+lmfit <- train(shares ~.,
+               data = lmtrain,
+               method = "lm")
+lmfit
+lmpred <- predict(lmfit, newdata = lmtest) 
+postResample(lmpred, lmtest$shares)
+```
+
+```{r random forest, echo=TRUE, eval=TRUE}
+RFfit <- train(shares ~ ., 
+                data = lmtrain, 
+                method = "rf", 
+                trControl = trainControl(method = "cv", number = 5), 
+                preProcess = c("center", "scale"),
+               tuneGrid = data.frame(mtry = 1:6))
+RFfit
+RFpred <- predict(RFfit, newdata = lmtest) 
+postResample(RFpred, lmtest$shares)
+```
+
+```{r}
+
+```
+
