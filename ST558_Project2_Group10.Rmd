@@ -8,13 +8,17 @@ date: '2022-07-03'
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(caret)
-library(matrixStats)
 library(ggplot2)
 ```
 
+```{r render, echo=TRUE, eval=FALSE}
+rmarkdown::render("ST558_Project2_Group10.Rmd", output_file = "entertainment.html", params = list('data_channel_is_entertainment'))
+```
+
 ```{r read in and subset data, echo=TRUE, eval=TRUE}
-LifestyleNews <- read_csv("OnlineNewsPopularity.csv", show_col_types = FALSE) %>%
-  filter(data_channel_is_lifestyle == 1) %>%
+LifestyleNews <- read_csv("OnlineNewsPopularity.csv", show_col_types = FALSE) 
+LifestyleNews %>% 
+  filter(params$Channels == 1) %>%
   select(shares, n_tokens_content, num_imgs, num_videos,
          global_rate_positive_words, global_subjectivity, is_weekend)
 LifestyleNews$is_weekend <- factor(LifestyleNews$is_weekend)
@@ -47,7 +51,7 @@ apply(X = select(train, shares:global_subjectivity), MARGIN = 2,
       })
 ```
 
-From numeric summary table, the response **shares** may have right-skewed distribution. The standard deviation of **shares** is unusually high, indicating that there are some outliers. The n_tokens_content, num_imgs, and num_videos predictors may have right-skewed distributions. The global_rate_positive_words and global_subjectivity may have the symmtric distribution.  
+From numeric summary table, if one variable's mean is greater than median, it has a right skewed distribution. If the mean is less than median, it has a left skewed distribution. If mean is close to median, it may have a symmetric distribution. If the standard deviation is unusual, there may be some outliers.  
 
 ## Contingency Table  
 
@@ -55,7 +59,7 @@ From numeric summary table, the response **shares** may have right-skewed distri
 table(train$is_weekend)
 ```
 
-From the contingency table, there are much more articles published on weekday.  
+From the contingency table, we can see how many articles are published on weekday and weekend.  
 
 ## Bar Plot  
 
@@ -65,13 +69,7 @@ g + geom_bar(fill = "Red", color = "Blue") +
   labs(title = "Bar Plot of is_weekend")
 ```
 
-```{r boxplot, echo=TRUE, eval=TRUE}
-g <- ggplot(data = train, aes(x = is_weekend, y = shares))
-g + geom_boxplot() +
-  geom_jitter(aes(color = is_weekend)) + 
-  labs()
-```
-
+From the bar plot, we can see how many articles are published on weekday and weekend and visualize the difference.  
 
 ```{r histograms, echo=TRUE, eval=TRUE}
 g <- ggplot(data = train, aes(x = shares))
@@ -81,11 +79,19 @@ g + geom_histogram(bins = 30, aes(fill = is_weekend)) +
   scale_fill_discrete(name = "Weekend Published", labels = c("No", "Yes"))
 ```
 
+For histogram, we can see the distribution of the number of shares. If we have majority of count on the left side and less count on right side, it may have a right skewed distribution. It indicates that most of articles have small number of shares. If we have majority of count on the right side and less count on left side, it may have a left skewed distribution. It indicates that most of articles have large number of shares. If we see a bell shape, it may have a symmetric distribution. It indicating most of articles have relatively large shares.  
+
 ```{r scatterplot, echo=TRUE, eval=TRUE}
 g <- ggplot(data = train, aes(x = n_tokens_content, y = shares))
 g + geom_point(aes(color = is_weekend)) +
-  geom_smooth(method = "lm")
+  geom_smooth(method = "lm") +
+  labs(x = "Number of Words in Content",
+       y = "Number of Shares",
+       title = "Scatter Plot of Shares vs Number of Words in Content") +
+  scale_color_discrete(name = "Weekend Published", labels = c("No", "Yes"))
 ```
+
+We can inspect the trend of shares as a function of the number of words in content. If the points show an upward trend, then articles with more number of words in the content to be shared more often. If we see a negative trend then articles with more number of words in the content tend to be shared less often.
 
 # Modeling  
 
@@ -136,7 +142,5 @@ RFpred <- predict(RFfit, newdata = test)
 postResample(RFpred, test$shares)
 ```
 
-```{r}
 
-```
 
