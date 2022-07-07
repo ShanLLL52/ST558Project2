@@ -2,6 +2,8 @@
 title: "ST558 Project2"
 author: "Shan Luo, Chengxi Zhou"
 date: '2022-07-03'
+params:
+  Channels: 'data_channel_is_lifestyle'
 ---
 
 ```{r setup, include=FALSE}
@@ -12,20 +14,20 @@ library(ggplot2)
 ```
 
 ```{r render, echo=TRUE, eval=FALSE}
-rmarkdown::render("ST558_Project2_Group10.Rmd", output_file = "entertainment.html", params = list('data_channel_is_entertainment'))
+rmarkdown::render("ST558_Project2_Group10.Rmd", output_file = "lifestyle.html", params = list(Channels = 'data_channel_is_lifestyle'))
 ```
 
 ```{r read in and subset data, echo=TRUE, eval=TRUE}
-LifestyleNews <- read_csv("OnlineNewsPopularity.csv", show_col_types = FALSE) 
-LifestyleNews %>% 
-  filter(params$Channels == 1) %>%
+News <- read_csv("OnlineNewsPopularity.csv", show_col_types = FALSE) 
+News <- News %>% 
+  filter(!!rlang::sym(params$Channels) == 1) %>%
   select(shares, n_tokens_content, num_imgs, num_videos,
          global_rate_positive_words, global_subjectivity, is_weekend)
-LifestyleNews$is_weekend <- factor(LifestyleNews$is_weekend)
+News$is_weekend <- factor(News$is_weekend)
 ```
 
 ```{r check correlation, echo=TRUE, eval=TRUE}
-cor(select(LifestyleNews ,shares, n_tokens_content, num_imgs, num_videos,
+cor(select(News ,shares, n_tokens_content, num_imgs, num_videos,
            global_rate_positive_words, global_subjectivity))
 ```
 
@@ -33,9 +35,9 @@ All of numeric variables have low correlations.
 
 ```{r split train and test data, echo=TRUE, eval=TRUE}
 set.seed(1)
-trainIndex <- createDataPartition(LifestyleNews$shares, p = 0.7, list = FALSE)
-train <- LifestyleNews[trainIndex, ]
-test <- LifestyleNews[-trainIndex, ]
+trainIndex <- createDataPartition(News$shares, p = 0.7, list = FALSE)
+train <- News[trainIndex, ]
+test <- News[-trainIndex, ]
 ```
 
 # EDA  
@@ -81,7 +83,7 @@ g + geom_histogram(bins = 30, aes(fill = is_weekend)) +
 
 For histogram, we can see the distribution of the number of shares. If we have majority of count on the left side and less count on right side, it may have a right skewed distribution. It indicates that most of articles have small number of shares. If we have majority of count on the right side and less count on left side, it may have a left skewed distribution. It indicates that most of articles have large number of shares. If we see a bell shape, it may have a symmetric distribution. It indicating most of articles have relatively large shares.  
 
-```{r scatterplot, echo=TRUE, eval=TRUE}
+```{r scatterplot, echo=TRUE, eval=TRUE, message=FALSE}
 g <- ggplot(data = train, aes(x = n_tokens_content, y = shares))
 g + geom_point(aes(color = is_weekend)) +
   geom_smooth(method = "lm") +
@@ -129,9 +131,7 @@ For Bootstrap Aggregation(Bagged) for regression tree, we create a bootstrap sam
 Random forest follows Bootstrap Aggregation idea. We will create multiple trees from bootstrap samples and average the results. But, we will use a random subset of predictors for each bootstrap tree fit instead of using all predictors. It may make bagged trees predictions more correlated, which can help with reduction of variation.  
 
 ```{r random forest, echo=TRUE, eval=TRUE}
-RFfit <- train(shares ~ (n_tokens_content + num_imgs + num_videos + 
-                         global_rate_positive_words + global_subjectivity + 
-                         is_weekend)^2, 
+RFfit <- train(shares ~ n_tokens_content + num_imgs + num_videos, 
                data = train, 
                method = "rf", 
                trControl = trainControl(method = "cv", number = 5), 
