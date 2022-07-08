@@ -55,17 +55,17 @@ The Following Packages are used in this project:
 # Analysis for Each Channel
 
 The analysis for [Lifestyle articles is available
-here](LifestyleAnalysis.html).
+here](LifestyleAnalysis.md).
 
 The analysis for [Entertainment articles is available
-here](EntertainmentAnalysis.html).
+here](EntertainmentAnalysis.md).
 
 The analysis for [Business articles is available
-here](BusinessAnalysis.html).
+here](BusinessAnalysis.md).
 
 The analysis for [Social Media articles is available
-here](SocialMediaAnalysis.html).
+here](SocialMediaAnalysis.md).
 
-The analysis for [Tech articles is available here](TechAnalysis.html).
+The analysis for [Tech articles is available here](TechAnalysis.md).
 
-The analysis for [World articles is available here](WorldAnalysis.html).
+The analysis for [World articles is available here](WorldAnalysis.md).
