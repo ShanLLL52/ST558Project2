@@ -6,7 +6,7 @@ Shan Luo, Chengxi Zhou
 This repo is for ST558 Project2. We are trying to use [online new
 popularity date
 set](https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity) to
-visulize data, fit four models, and comparing them for six different
+visualize data, fit four models, and comparing them for six different
 data channels.
 
 # Code to render README
@@ -55,13 +55,13 @@ The Following Packages are used in this project:
 # Analysis for Each Channel
 
 The analysis for [Lifestyle articles is available
-here](lifestyleAnalysis.html).
+here](LifestyleAnalysis.html).
 
 The analysis for [Entertainment articles is available
 here](EntertainmentAnalysis.html).
 
 The analysis for [Business articles is available
-here](BusiessAnalysis.html).
+here](BusinessAnalysis.html).
 
 The analysis for [Social Media articles is available
 here](SocialMediaAnalysis.html).
