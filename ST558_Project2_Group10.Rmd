@@ -19,6 +19,18 @@ rmarkdown::render("ST558_Project2_Group10.Rmd", output_file = "lifestyle.html", 
 
 # Introduction
 
+We are trying to predict the number of shares in social networks using predictive models among different data channels. The data set we have is the Online News Popularity Data Set, which summarizes a heterogeneous set of features about articles published by Mashable in two years.
+
+Since the number of shares is our target variable, the dependent variable in models would be **shares**.
+
+Intuitively, the *number of words in the content*, *number of images*, *number of videos*, *rate of positive words in the content*, *text subjectivity* and *whether published on the weekend or not* would affect the number of shares, so we choose **n_tokens_content**, **num_imgs**, **num_videos**, **global_rate_positive_words**, **global_subjectivity** and **is_weekend** to be the independent variables.
+
+We also take the article categories into our consideration: the effects of variables mentioned above may vary on different types of articles. In order to study that, we could subset the data into each levels of article types before modeling. There exists six types in our data set: lifestyle, entertainment, bus, socmed, tech and world.
+
+As we want to investigate the effect of these independent variables on the number of shares, the first step would be presenting a brief EDA to have a preliminary understanding of data, then modeling data with predictive models and compare them.
+
+The predictive models we choose are linear regression model and ensemble tree-based models, which we'll describe more later.
+
 ```{r read in and subset data, echo=TRUE, eval=TRUE}
 # Read in data and subset data
 News <- read_csv("OnlineNewsPopularity.csv", show_col_types = FALSE) 
@@ -26,7 +38,10 @@ News <- News %>%
   filter(!!rlang::sym(params$Channels) == 1) %>%
   select(shares, n_tokens_content, num_imgs, num_videos,
          global_rate_positive_words, global_subjectivity, is_weekend)
+
+# convert the is_weekend variable to a factor
 News$is_weekend <- factor(News$is_weekend)
+News
 ```
 
 ```{r split train and test data, echo=TRUE, eval=TRUE}
@@ -70,12 +85,19 @@ table(train$is_weekend)
 
 From the contingency table, we can see how many articles are published on weekday and weekend.  
 
+```{r contingency table2, echo=TRUE, eval=TRUE}
+# Create contingency table of predictor "num_videos"
+table(train$num_videos)
+```
+
+From the contingency table, we can see the number of articles with different amount of videos.
+
 ## Bar Plot  
 
 ```{r barplot, echo=TRUE, eval=TRUE}
 # Create bar plot of predictor "is_weekend"
 g <- ggplot(data = train, aes(x = is_weekend))
-g + geom_bar(fill = "Red", color = "Blue") +
+g + geom_bar(fill = "cyan2") +
   labs(title = "Bar Plot of is_weekend")
 ```
 
@@ -90,7 +112,26 @@ g + geom_histogram(bins = 30, aes(fill = is_weekend)) +
   scale_fill_discrete(name = "Weekend Published", labels = c("No", "Yes"))
 ```
 
-For histogram, we can see the distribution of the number of shares. If we have majority of count on the left side and less count on right side, it may have a right skewed distribution. It indicates that most of articles have small number of shares. If we have majority of count on the right side and less count on left side, it may have a left skewed distribution. It indicates that most of articles have large number of shares. If we see a bell shape, it may have a symmetric distribution. It indicating most of articles have relatively large shares.  
+For histogram, we can see the distribution of the number of shares. If we have majority of count on the left side and less count on right side, it may have a right skewed distribution. It indicates that most of articles have small number of shares. If we have majority of count on the right side and less count on left side, it may have a left skewed distribution. It indicates that most of articles have large number of shares. If we see a bell shape, it may have a symmetric distribution. It indicates that most of articles have relatively large shares.  
+
+```{r histograms2, echo=TRUE, eval=TRUE}
+# Create histogram of response "num_videos" and fill with predictor "is_weekend"
+g <- ggplot(data = train, aes(x = num_videos))
+g + geom_histogram(bins = 30, aes(fill = is_weekend)) +
+  labs(x = "Number of Videos",
+       title = "Histogram of Number of Videos") +
+  scale_fill_discrete(name = "Weekend Published", labels = c("No", "Yes"))
+```
+
+For histogram, we can see the distribution of the number of videos. If we have majority of count on the left side and less count on right side, it may have a right skewed distribution. It indicates that most of articles have small number of videos. If we have majority of count on the right side and less count on left side, it may have a left skewed distribution. It indicates that most of articles have large number of videos. If we see a bell shape, it may have a symmetric distribution. It indicates that the number of videos are approximately normally distributed. 
+
+```{r jtplot, echo=TRUE, message=FALSE, warning=FALSE}
+ggplot(train, aes(x = is_weekend, y = shares)) +
+geom_point(aes(color = is_weekend), position = "jitter") + scale_color_discrete(name = "is_weekend") +
+  ggtitle("Jitter Plot of shares in weekend/non-weekend") + xlab("is_weekend")
+```
+
+We can generate a jitter plot showing the spread of shares data among weekend days and non-weekend days.
 
 ```{r scatterplot, echo=TRUE, eval=TRUE}
 # Create scatter plot of response "shares" and predictor "n_tokens_content".
@@ -105,6 +146,20 @@ g + geom_point(aes(color = is_weekend)) +
 ```
 
 We can inspect the trend of shares as a function of the number of words in content. If the points show an upward trend, then articles with more number of words in the content to be shared more often. If we see a negative trend then articles with more number of words in the content tend to be shared less often.
+
+```{r scatterplot, echo=TRUE, eval=TRUE}
+# Create scatter plot of response "shares" and predictor "num_imgs".
+# Filled with predictor "is_weekend"
+g <- ggplot(data = train, aes(x = num_imgs, y = shares))
+g + geom_point(aes(color = is_weekend)) +
+  geom_smooth(method = "lm") +
+  labs(x = "Number of Images",
+       y = "Number of Shares",
+       title = "Scatter Plot of Shares vs Number of images") + 
+  scale_color_discrete(name = "Weekend Published", labels = c("No", "Yes"))
+```
+
+We can also inspect the trend of shares as a function of the number of images. If the points show an upward trend, then articles with more images would be shared more often. If we see a negative trend then articles with more images tend to be shared less often.
 
 # Modeling  
 
@@ -128,6 +183,7 @@ lmfit1 <- train(shares ~ (n_tokens_content + num_imgs + num_videos +
              preProcess = c("center", "scale"),
              trControl = trainControl(method = "cv", number = 5))
 lmfit1
+
 lmpred1 <- predict(lmfit1, newdata = test) 
 lm1 <- postResample(lmpred1, test$shares)
 lm1
@@ -201,6 +257,8 @@ boostedpre <- predict(boostedTfit, newdata = test)
 boosted <- postResample(boostedpre, test$shares)
 boosted
 ```
+
+After fitting these different models, we want to declare the best model by comparing their RMSEs: the model with smallest RMSE is the best model.
 
 ```{r comparsion of models, echo=TRUE, eval=TRUE}
 allRMSE <- tibble(lm1[1], lm2[1], rf[1], boosted[1])
