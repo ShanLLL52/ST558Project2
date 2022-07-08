@@ -3,7 +3,7 @@ title: "ST558 Project2"
 author: "Shan Luo, Chengxi Zhou"
 date: '2022-07-03'
 params:
-  Channels: 'data_channel_is_lifestyle'
+  Channels: 'data_channel_is_bus'
 ---
 
 ```{r setup, include=FALSE}
@@ -11,10 +11,11 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(caret)
 library(ggplot2)
+library(rmarkdown)
 ```
 
 ```{r render, echo=TRUE, eval=FALSE}
-rmarkdown::render("ST558_Project2_Group10.Rmd", output_file = "lifestyle.html", params = list(Channels = 'data_channel_is_lifestyle'))
+rmarkdown::render("ST558_Project2_Group10.Rmd", output_file = "lifestyle.html", params = list(Channels = 'data_channel_is_bus'))
 ```
 
 # Introduction
@@ -213,3 +214,25 @@ RMSE_sort[1,]
 ```
 
 The result is the best model and its RMSE.  
+
+# Automation  
+
+```{r automation, eval=FALSE}
+channels <- c("data_channel_is_lifestyle", "data_channel_is_entertainment", "data_channel_is_bus", "data_channel_is_socmed", "data_channel_is_tech", "data_channel_is_world")
+# Create file names
+output_file <- paste0(channels, "Analysis.md")
+# Create a list for each channel with just channel name parameter
+params <- lapply(channels, FUN = function(x){
+  list(Channels = x)
+})
+# Put into a data frame
+reports <- tibble(output_file, params)
+apply(reports, MARGIN = 1, FUN = function(x) {
+  render(input = "ST558_Project2_Group10.Rmd", 
+         output_format = "github_document", 
+         output_file = x[[1]], 
+         params = x[[2]], 
+         output_options = list(html_preview = FALSE)) 
+})
+```
+
