@@ -34,33 +34,33 @@ cor(select(News ,shares, n_tokens_content, num_imgs, num_videos,
 ```
 
     ##                                  shares n_tokens_content
-    ## shares                      1.000000000       0.07136418
-    ## n_tokens_content            0.071364177       1.00000000
-    ## num_imgs                    0.008224127       0.50638544
-    ## num_videos                  0.033939820       0.08719273
-    ## global_rate_positive_words -0.019340076       0.15071066
-    ## global_subjectivity         0.009474031       0.11605157
-    ##                                num_imgs  num_videos
-    ## shares                      0.008224127  0.03393982
-    ## n_tokens_content            0.506385440  0.08719273
-    ## num_imgs                    1.000000000 -0.03670218
-    ## num_videos                 -0.036702176  1.00000000
-    ## global_rate_positive_words  0.085219812  0.01714951
-    ## global_subjectivity         0.035773480  0.02264064
+    ## shares                      1.000000000       0.07302425
+    ## n_tokens_content            0.073024252       1.00000000
+    ## num_imgs                    0.051201300       0.46442622
+    ## num_videos                  0.088311059       0.04005714
+    ## global_rate_positive_words -0.005395787       0.12779576
+    ## global_subjectivity         0.017739883       0.09117454
+    ##                               num_imgs    num_videos
+    ## shares                      0.05120130  0.0883110588
+    ## n_tokens_content            0.46442622  0.0400571423
+    ## num_imgs                    1.00000000 -0.0550097529
+    ## num_videos                 -0.05500975  1.0000000000
+    ## global_rate_positive_words  0.06914830 -0.0000483498
+    ## global_subjectivity         0.19925466  0.0254110044
     ##                            global_rate_positive_words
-    ## shares                                    -0.01934008
-    ## n_tokens_content                           0.15071066
-    ## num_imgs                                   0.08521981
-    ## num_videos                                 0.01714951
-    ## global_rate_positive_words                 1.00000000
-    ## global_subjectivity                        0.31530068
+    ## shares                                  -0.0053957870
+    ## n_tokens_content                         0.1277957592
+    ## num_imgs                                 0.0691482967
+    ## num_videos                              -0.0000483498
+    ## global_rate_positive_words               1.0000000000
+    ## global_subjectivity                      0.3833653985
     ##                            global_subjectivity
-    ## shares                             0.009474031
-    ## n_tokens_content                   0.116051567
-    ## num_imgs                           0.035773480
-    ## num_videos                         0.022640636
-    ## global_rate_positive_words         0.315300682
-    ## global_subjectivity                1.000000000
+    ## shares                              0.01773988
+    ## n_tokens_content                    0.09117454
+    ## num_imgs                            0.19925466
+    ## num_videos                          0.02541100
+    ## global_rate_positive_words          0.38336540
+    ## global_subjectivity                 1.00000000
 
 If two variables have high correlation, we may think about removing one
 of them.
@@ -79,20 +79,20 @@ apply(X = select(train, shares:global_subjectivity), MARGIN = 2,
       })
 ```
 
-    ##            shares n_tokens_content  num_imgs num_videos
-    ## Min        64.000           0.0000  0.000000   0.000000
-    ## Mean     3115.597         569.3333  4.398251   0.449174
-    ## Median   1700.000         402.0000  1.000000   0.000000
-    ## Max    663600.000        5530.0000 65.000000  73.000000
-    ## Sd      10414.935         487.6206  6.943689   1.654261
-    ## IQR      1900.000         475.0000  4.000000   1.000000
+    ##            shares n_tokens_content   num_imgs num_videos
+    ## Min        28.000           0.0000   0.000000  0.0000000
+    ## Mean     3535.421         634.7976   4.934783  0.4429348
+    ## Median   1700.000         508.5000   1.000000  0.0000000
+    ## Max    196700.000        8474.0000 111.000000 15.0000000
+    ## Sd       8131.063         597.1858   8.281820  1.3419971
+    ## IQR      2125.000         489.2500   7.000000  0.0000000
     ##        global_rate_positive_words global_subjectivity
     ## Min                    0.00000000          0.00000000
-    ## Mean                   0.04270544          0.45728954
-    ## Median                 0.04172275          0.46018511
-    ## Max                    0.15217391          0.81269231
-    ## Sd                     0.01463915          0.07572785
-    ## IQR                    0.01847437          0.09109708
+    ## Mean                   0.04470561          0.47396401
+    ## Median                 0.04432815          0.47787444
+    ## Max                    0.12138728          0.77777778
+    ## Sd                     0.01517567          0.09191057
+    ## IQR                    0.01870835          0.10199113
 
 From numeric summary table, if one variable’s mean is greater than
 median, it has a right skewed distribution. If the mean is less than
@@ -109,7 +109,7 @@ table(train$is_weekend)
 
     ## 
     ##    0    1 
-    ## 4505  640
+    ## 1186  286
 
 From the contingency table, we can see how many articles are published
 on weekday and weekend.
@@ -123,7 +123,7 @@ g + geom_bar(fill = "Red", color = "Blue") +
   labs(title = "Bar Plot of is_weekend")
 ```
 
-![](data_channel_is_techAnalysis_files/figure-gfm/barplot-1.png)<!-- -->
+![](LifestyleAnalysis_files/figure-gfm/barplot-1.png)<!-- -->
 
 From the bar plot, we can see how many articles are published on weekday
 and weekend and visualize the difference.
@@ -137,7 +137,7 @@ g + geom_histogram(bins = 30, aes(fill = is_weekend)) +
   scale_fill_discrete(name = "Weekend Published", labels = c("No", "Yes"))
 ```
 
-![](data_channel_is_techAnalysis_files/figure-gfm/histograms-1.png)<!-- -->
+![](LifestyleAnalysis_files/figure-gfm/histograms-1.png)<!-- -->
 
 For histogram, we can see the distribution of the number of shares. If
 we have majority of count on the left side and less count on right side,
@@ -162,7 +162,7 @@ g + geom_point(aes(color = is_weekend)) +
 
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](data_channel_is_techAnalysis_files/figure-gfm/scatterplot-1.png)<!-- -->
+![](LifestyleAnalysis_files/figure-gfm/scatterplot-1.png)<!-- -->
 
 We can inspect the trend of shares as a function of the number of words
 in content. If the points show an upward trend, then articles with more
@@ -187,7 +187,7 @@ mod <- lm(shares ~ (n_tokens_content + num_imgs + num_videos +
 forward_mod <- step(mod, direction = "forward")
 ```
 
-    ## Start:  AIC=95086.87
+    ## Start:  AIC=26400.8
     ## shares ~ (n_tokens_content + num_imgs + num_videos + global_rate_positive_words + 
     ##     global_subjectivity + is_weekend)^2
 
@@ -204,16 +204,16 @@ lmfit1
 
     ## Linear Regression 
     ## 
-    ## 5145 samples
+    ## 1472 samples
     ##    6 predictor
     ## 
     ## Pre-processing: centered (21), scaled (21) 
     ## Resampling: Cross-Validated (5 fold) 
-    ## Summary of sample sizes: 4117, 4116, 4116, 4115, 4116 
+    ## Summary of sample sizes: 1179, 1177, 1176, 1177, 1179 
     ## Resampling results:
     ## 
-    ##   RMSE     Rsquared     MAE     
-    ##   8386.67  0.004413032  2660.438
+    ##   RMSE      Rsquared     MAE     
+    ##   8274.591  0.003626336  3323.125
     ## 
     ## Tuning parameter 'intercept' was held constant at a value of TRUE
 
@@ -224,7 +224,7 @@ lm1
 ```
 
     ##         RMSE     Rsquared          MAE 
-    ## 4.531826e+03 2.573664e-03 2.461080e+03
+    ## 1.121763e+04 2.466283e-04 3.851382e+03
 
 ``` r
 lmfit2 <- train(shares ~ n_tokens_content + num_imgs + num_videos + 
@@ -239,16 +239,16 @@ lmfit2
 
     ## Linear Regression 
     ## 
-    ## 5145 samples
+    ## 1472 samples
     ##    6 predictor
     ## 
     ## Pre-processing: centered (6), scaled (6) 
     ## Resampling: Cross-Validated (5 fold) 
-    ## Summary of sample sizes: 4115, 4117, 4116, 4115, 4117 
+    ## Summary of sample sizes: 1177, 1178, 1178, 1177, 1178 
     ## Resampling results:
     ## 
-    ##   RMSE     Rsquared     MAE     
-    ##   8225.14  0.008055095  2449.869
+    ##   RMSE      Rsquared   MAE     
+    ##   7707.162  0.0108539  3166.798
     ## 
     ## Tuning parameter 'intercept' was held constant at a value of TRUE
 
@@ -259,7 +259,7 @@ lm2
 ```
 
     ##         RMSE     Rsquared          MAE 
-    ## 4.321411e+03 5.418740e-03 2.302587e+03
+    ## 1.089556e+04 2.754176e-04 3.690541e+03
 
 ## Random Forest
 
@@ -293,21 +293,21 @@ rffit
 
     ## Random Forest 
     ## 
-    ## 5145 samples
+    ## 1472 samples
     ##    6 predictor
     ## 
     ## Pre-processing: centered (6), scaled (6) 
     ## Resampling: Cross-Validated (5 fold) 
-    ## Summary of sample sizes: 4116, 4117, 4116, 4114, 4117 
+    ## Summary of sample sizes: 1178, 1178, 1178, 1177, 1177 
     ## Resampling results across tuning parameters:
     ## 
-    ##   mtry  RMSE       Rsquared     MAE     
-    ##   1      8378.024  0.003572903  2414.093
-    ##   2      8736.200  0.002236229  2500.623
-    ##   3      9070.886  0.001772773  2566.117
-    ##   4      9544.126  0.001571905  2606.870
-    ##   5     10193.312  0.001702744  2642.768
-    ##   6     10810.180  0.001624221  2680.768
+    ##   mtry  RMSE      Rsquared     MAE     
+    ##   1     7166.369  0.018446664  3030.324
+    ##   2     7294.605  0.013125457  3158.129
+    ##   3     7397.528  0.006885392  3203.126
+    ##   4     7458.584  0.005101914  3235.539
+    ##   5     7535.760  0.004688708  3262.605
+    ##   6     7560.367  0.004318681  3278.198
     ## 
     ## RMSE was used to select the optimal model using the
     ##  smallest value.
@@ -320,7 +320,7 @@ rf
 ```
 
     ##         RMSE     Rsquared          MAE 
-    ## 4.330136e+03 1.145787e-02 2.251522e+03
+    ## 1.092618e+04 8.974418e-04 3.742807e+03
 
 ## Boosted Tree
 
@@ -329,10 +329,12 @@ over fit. For boosting, trees grow sequentially and each subsequent tree
 is grown on a modified version of original data. Prediction updates as
 trees grown.
 
-The process of boosted tree: 1. Initialized prediction as 0 2. Find
-residuals(observed-predicted) 3. Fit a tree with d splits(d + 1 terminal
-nodes) treating the residuals as response 4. Update predictions 5.
-Update residuals for new predictions and repeat B times
+The process of boosted tree:  
+1. Initialized prediction as 0  
+2. Find residuals(observed-predicted) 3. Fit a tree with d splits(d + 1
+terminal nodes) treating the residuals as response  
+4. Update predictions  
+5. Update residuals for new predictions and repeat B times
 
 ``` r
 boostedTfit <- train(shares ~ n_tokens_content + num_imgs + num_videos + 
@@ -352,35 +354,35 @@ boostedTfit
 
     ## Stochastic Gradient Boosting 
     ## 
-    ## 5145 samples
+    ## 1472 samples
     ##    6 predictor
     ## 
     ## Pre-processing: centered (6), scaled (6) 
     ## Resampling: Cross-Validated (5 fold) 
-    ## Summary of sample sizes: 4116, 4115, 4117, 4116, 4116 
+    ## Summary of sample sizes: 1178, 1177, 1178, 1178, 1177 
     ## Resampling results across tuning parameters:
     ## 
     ##   interaction.depth  n.trees  RMSE      Rsquared     MAE     
-    ##   1                   25      8179.969  0.002747412  2461.965
-    ##   1                   50      8268.841  0.002517195  2477.234
-    ##   1                  100      8216.402  0.002368653  2453.472
-    ##   1                  150      8347.333  0.001513399  2494.584
-    ##   1                  200      8413.652  0.001343721  2488.080
-    ##   2                   25      8204.618  0.006038641  2449.183
-    ##   2                   50      8457.629  0.004151169  2490.538
-    ##   2                  100      8738.871  0.003845280  2529.015
-    ##   2                  150      8874.764  0.003777606  2529.437
-    ##   2                  200      9098.273  0.002948534  2546.179
-    ##   3                   25      8401.467  0.003936689  2490.161
-    ##   3                   50      8397.795  0.004043691  2483.915
-    ##   3                  100      8503.448  0.003397994  2495.688
-    ##   3                  150      8680.560  0.003761775  2511.371
-    ##   3                  200      8852.616  0.004025436  2538.853
-    ##   4                   25      8290.325  0.004729971  2469.166
-    ##   4                   50      8401.996  0.004298943  2486.691
-    ##   4                  100      8497.185  0.005195485  2503.181
-    ##   4                  150      8855.632  0.003609760  2563.485
-    ##   4                  200      8887.758  0.004424285  2573.561
+    ##   1                   25      7655.952  0.007241277  3120.906
+    ##   1                   50      7686.595  0.007488185  3143.022
+    ##   1                  100      7684.001  0.008571235  3118.175
+    ##   1                  150      7650.802  0.008991964  3087.661
+    ##   1                  200      7698.483  0.007824411  3128.217
+    ##   2                   25      7686.215  0.009860349  3145.996
+    ##   2                   50      7695.024  0.013333562  3188.685
+    ##   2                  100      7792.925  0.012716309  3221.369
+    ##   2                  150      7783.939  0.016777767  3224.684
+    ##   2                  200      7841.793  0.018807243  3268.382
+    ##   3                   25      7658.308  0.011443356  3140.642
+    ##   3                   50      7713.388  0.011250838  3180.927
+    ##   3                  100      7869.600  0.010431773  3233.186
+    ##   3                  150      7839.001  0.016953242  3248.383
+    ##   3                  200      7834.834  0.018907480  3277.814
+    ##   4                   25      7629.122  0.014080331  3137.897
+    ##   4                   50      7732.990  0.009155742  3203.752
+    ##   4                  100      7925.713  0.010190683  3344.143
+    ##   4                  150      7921.004  0.014911125  3383.256
+    ##   4                  200      7852.893  0.020019426  3406.909
     ## 
     ## Tuning parameter 'shrinkage' was held constant at a value of
     ##  0.1
@@ -389,7 +391,7 @@ boostedTfit
     ## RMSE was used to select the optimal model using the
     ##  smallest value.
     ## The final values used for the model were n.trees =
-    ##  25, interaction.depth = 1, shrinkage = 0.1 and n.minobsinnode
+    ##  25, interaction.depth = 4, shrinkage = 0.1 and n.minobsinnode
     ##  = 10.
 
 ``` r
@@ -399,7 +401,7 @@ boosted
 ```
 
     ##         RMSE     Rsquared          MAE 
-    ## 4.442609e+03 2.685812e-04 2.313039e+03
+    ## 1.044403e+04 8.911805e-03 3.639445e+03
 
 ``` r
 allRMSE <- tibble(lm1[1], lm2[1], rf[1], boosted[1])
@@ -412,9 +414,9 @@ RMSE_sort[1,]
 ```
 
     ## # A tibble: 1 × 2
-    ##   Model              RMSE
-    ##   <chr>             <dbl>
-    ## 1 LinearRegression2 4321.
+    ##   Model         RMSE
+    ##   <chr>        <dbl>
+    ## 1 BoostedTree 10444.
 
 The result is the best model and its RMSE.
 
@@ -423,18 +425,20 @@ The result is the best model and its RMSE.
 ``` r
 channels <- c("data_channel_is_lifestyle", "data_channel_is_entertainment", "data_channel_is_bus", "data_channel_is_socmed", "data_channel_is_tech", "data_channel_is_world")
 # Create file names
-output_file <- paste0(channels, "Analysis.md")
+name <- c("Lifestyle", "Entertainment", "Business", "SocialMedia",
+          "Tech", "World")
+output_file <- paste0(name, "Analysis.md")
 # Create a list for each channel with just channel name parameter
 params <- lapply(channels, FUN = function(x){
   list(Channels = x)
 })
 # Put into a data frame
-reports <- tibble(output_file, params)
+reports <- tibble::tibble(output_file, params)
 apply(reports, MARGIN = 1, FUN = function(x) {
-  render(input = "ST558_Project2_Group10.Rmd", 
-         output_format = "github_document", 
-         output_file = x[[1]], 
-         params = x[[2]], 
-         output_options = list(html_preview = FALSE)) 
+  rmarkdown::render(input = "ST558_Project2_Group10.Rmd", 
+                    output_format = "github_document", 
+                    output_file = x[[1]], 
+                    params = x[[2]], 
+                    output_options = list(html_preview = FALSE)) 
 })
 ```

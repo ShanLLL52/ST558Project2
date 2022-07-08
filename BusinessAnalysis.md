@@ -123,7 +123,7 @@ g + geom_bar(fill = "Red", color = "Blue") +
   labs(title = "Bar Plot of is_weekend")
 ```
 
-![](data_channel_is_busAnalysis_files/figure-gfm/barplot-1.png)<!-- -->
+![](BusinessAnalysis_files/figure-gfm/barplot-1.png)<!-- -->
 
 From the bar plot, we can see how many articles are published on weekday
 and weekend and visualize the difference.
@@ -137,7 +137,7 @@ g + geom_histogram(bins = 30, aes(fill = is_weekend)) +
   scale_fill_discrete(name = "Weekend Published", labels = c("No", "Yes"))
 ```
 
-![](data_channel_is_busAnalysis_files/figure-gfm/histograms-1.png)<!-- -->
+![](BusinessAnalysis_files/figure-gfm/histograms-1.png)<!-- -->
 
 For histogram, we can see the distribution of the number of shares. If
 we have majority of count on the left side and less count on right side,
@@ -162,7 +162,7 @@ g + geom_point(aes(color = is_weekend)) +
 
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](data_channel_is_busAnalysis_files/figure-gfm/scatterplot-1.png)<!-- -->
+![](BusinessAnalysis_files/figure-gfm/scatterplot-1.png)<!-- -->
 
 We can inspect the trend of shares as a function of the number of words
 in content. If the points show an upward trend, then articles with more
@@ -329,10 +329,12 @@ over fit. For boosting, trees grow sequentially and each subsequent tree
 is grown on a modified version of original data. Prediction updates as
 trees grown.
 
-The process of boosted tree: 1. Initialized prediction as 0 2. Find
-residuals(observed-predicted) 3. Fit a tree with d splits(d + 1 terminal
-nodes) treating the residuals as response 4. Update predictions 5.
-Update residuals for new predictions and repeat B times
+The process of boosted tree:  
+1. Initialized prediction as 0  
+2. Find residuals(observed-predicted) 3. Fit a tree with d splits(d + 1
+terminal nodes) treating the residuals as response  
+4. Update predictions  
+5. Update residuals for new predictions and repeat B times
 
 ``` r
 boostedTfit <- train(shares ~ n_tokens_content + num_imgs + num_videos + 
@@ -423,18 +425,20 @@ The result is the best model and its RMSE.
 ``` r
 channels <- c("data_channel_is_lifestyle", "data_channel_is_entertainment", "data_channel_is_bus", "data_channel_is_socmed", "data_channel_is_tech", "data_channel_is_world")
 # Create file names
-output_file <- paste0(channels, "Analysis.md")
+name <- c("Lifestyle", "Entertainment", "Business", "SocialMedia",
+          "Tech", "World")
+output_file <- paste0(name, "Analysis.md")
 # Create a list for each channel with just channel name parameter
 params <- lapply(channels, FUN = function(x){
   list(Channels = x)
 })
 # Put into a data frame
-reports <- tibble(output_file, params)
+reports <- tibble::tibble(output_file, params)
 apply(reports, MARGIN = 1, FUN = function(x) {
-  render(input = "ST558_Project2_Group10.Rmd", 
-         output_format = "github_document", 
-         output_file = x[[1]], 
-         params = x[[2]], 
-         output_options = list(html_preview = FALSE)) 
+  rmarkdown::render(input = "ST558_Project2_Group10.Rmd", 
+                    output_format = "github_document", 
+                    output_file = x[[1]], 
+                    params = x[[2]], 
+                    output_options = list(html_preview = FALSE)) 
 })
 ```
