@@ -24,13 +24,15 @@ rmarkdown::render("ST558_Project2_Group10_README.Rmd",
 ``` r
 channels <- c("data_channel_is_lifestyle", "data_channel_is_entertainment", "data_channel_is_bus", "data_channel_is_socmed", "data_channel_is_tech", "data_channel_is_world")
 # Create file names
-output_file <- paste0(channels, "Analysis.md")
+name <- c("Lifestyle", "Entertainment", "Business", "SocialMedia",
+          "Tech", "World")
+output_file <- paste0(name, "Analysis.md")
 # Create a list for each channel with just channel name parameter
 params <- lapply(channels, FUN = function(x){
   list(Channels = x)
 })
 # Put into a data frame
-reports <- tibble(output_file, params)
+reports <- tibble::tibble(output_file, params)
 apply(reports, MARGIN = 1, FUN = function(x) {
   rmarkdown::render(input = "ST558_Project2_Group10.Rmd", 
                     output_format = "github_document", 
@@ -46,24 +48,24 @@ The Following Packages are used in this project:
 
 [`tidyverse`](https://www.tidyverse.org)  
 [`ggplot2`](https://ggplot2.tidyverse.org)  
-[`caret`](https://topepo.github.io/caret/)
+[`caret`](https://topepo.github.io/caret/)  
+[`rmarkdown`](https://cran.r-project.org/web/packages/rmarkdown/index.html)  
+[`tibble`](https://cran.r-project.org/web/packages/tibble/index.html)
 
 # Analysis for Each Channel
 
 The analysis for [Lifestyle articles is available
-here](data_channel_is_lifestyleAnalysis.html).
+here](lifestyleAnalysis.html).
 
 The analysis for [Entertainment articles is available
-here](data_channel_is_entertainmentAnalysis.html).
+here](EntertainmentAnalysis.html).
 
 The analysis for [Business articles is available
-here](data_channel_is_busAnalysis.html).
+here](BusiessAnalysis.html).
 
 The analysis for [Social Media articles is available
-here](data_channel_is_socmedAnalysis.html).
+here](SocialMediaAnalysis.html).
 
-The analysis for [Tech articles is available
-here](data_channel_is_techAnalysis.html).
+The analysis for [Tech articles is available here](TechAnalysis.html).
 
-The analysis for [World articles is available
-here](data_channel_is_worldAnalysis.html).
+The analysis for [World articles is available here](WorldAnalysis.html).
