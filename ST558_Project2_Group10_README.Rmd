@@ -8,7 +8,7 @@ date: '2022-07-08'
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-This repo is for ST558 Project2. We are trying to use [online new popularity date set](https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity) to visulize data, fit four models, and comparing them for six different data channels. 
+This repo is for ST558 Project2. We are trying to use [online new popularity date set](https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity) to visualize data, fit four models, and comparing them for six different data channels. 
 
 # Code to render README  
 
