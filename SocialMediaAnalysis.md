@@ -3,11 +3,36 @@ ST558 Project2
 Shan Luo, Chengxi Zhou
 2022-07-03
 
-``` r
-rmarkdown::render("ST558_Project2_Group10.Rmd", output_file = "lifestyle.html", params = list(Channels = 'data_channel_is_bus'))
-```
-
 # Introduction
+
+We are trying to predict the number of shares in social networks using
+predictive models among different data channels. The data set we have is
+the Online News Popularity Data Set, which summarizes a heterogeneous
+set of features about articles published by Mashable in two years.
+
+Since the number of shares is our target variable, the dependent
+variable in models would be **shares**.
+
+Intuitively, the *number of words in the content*, *number of images*,
+*number of videos*, *rate of positive words in the content*, *text
+subjectivity* and *whether published on the weekend or not* would affect
+the number of shares, so we choose **n_tokens_content**, **num_imgs**,
+**num_videos**, **global_rate_positive_words**, **global_subjectivity**
+and **is_weekend** to be the independent variables.
+
+We also take the article categories into our consideration: the effects
+of variables mentioned above may vary on different types of articles. In
+order to study that, we could subset the data into each levels of
+article types before modeling. There exists six types in our data set:
+lifestyle, entertainment, bus, socmed, tech and world.
+
+As we want to investigate the effect of these independent variables on
+the number of shares, the first step would be presenting a brief EDA to
+have a preliminary understanding of data, then modeling data with
+predictive models and compare them.
+
+The predictive models we choose are linear regression model and ensemble
+tree-based models, which we’ll describe more later.
 
 ``` r
 # Read in data and subset data
@@ -16,8 +41,27 @@ News <- News %>%
   filter(!!rlang::sym(params$Channels) == 1) %>%
   select(shares, n_tokens_content, num_imgs, num_videos,
          global_rate_positive_words, global_subjectivity, is_weekend)
+
+# convert the is_weekend variable to a factor
 News$is_weekend <- factor(News$is_weekend)
+News
 ```
+
+    ## # A tibble: 2,323 × 7
+    ##    shares n_tokens_content num_imgs num_videos global_rate_posit…
+    ##     <dbl>            <dbl>    <dbl>      <dbl>              <dbl>
+    ##  1   2600              257        0          1             0.0311
+    ##  2    690              218       11          0             0.0550
+    ##  3   4800             1226        1          1             0.0228
+    ##  4    851             1121        1          0             0.0562
+    ##  5   4800              168       11          0             0.0714
+    ##  6   9200              100        1          0             0.07  
+    ##  7   1600             1596        8          0             0.0533
+    ##  8    775              518        1          0             0.0676
+    ##  9  18200              358        1          0             0.0391
+    ## 10   1600              358        1          0             0.0559
+    ## # … with 2,313 more rows, and 2 more variables:
+    ## #   global_subjectivity <dbl>, is_weekend <fct>
 
 ``` r
 # Split train and test data
@@ -114,12 +158,28 @@ table(train$is_weekend)
 From the contingency table, we can see how many articles are published
 on weekday and weekend.
 
+``` r
+# Create contingency table of predictor "num_videos"
+table(train$num_videos)
+```
+
+    ## 
+    ##    0    1    2    3    4    5    6    7    8    9   10   11   12 
+    ## 1122  252  116   31   13    9    4    6    7    8   15   11    3 
+    ##   13   14   15   16   17   18   19   20   21   24   26   27   28 
+    ##    2    5    3    3    5    3    3    1    1    1    1    1    1 
+    ##   34 
+    ##    1
+
+From the contingency table, we can see the number of articles with
+different amount of videos.
+
 ## Bar Plot
 
 ``` r
 # Create bar plot of predictor "is_weekend"
 g <- ggplot(data = train, aes(x = is_weekend))
-g + geom_bar(fill = "Red", color = "Blue") +
+g + geom_bar(fill = "cyan2") +
   labs(title = "Bar Plot of is_weekend")
 ```
 
@@ -146,7 +206,39 @@ articles have small number of shares. If we have majority of count on
 the right side and less count on left side, it may have a left skewed
 distribution. It indicates that most of articles have large number of
 shares. If we see a bell shape, it may have a symmetric distribution. It
-indicating most of articles have relatively large shares.
+indicates that most of articles have relatively large shares.
+
+``` r
+# Create histogram of response "num_videos" and fill with predictor "is_weekend"
+g <- ggplot(data = train, aes(x = num_videos))
+g + geom_histogram(bins = 30, aes(fill = is_weekend)) +
+  labs(x = "Number of Videos",
+       title = "Histogram of Number of Videos") +
+  scale_fill_discrete(name = "Weekend Published", labels = c("No", "Yes"))
+```
+
+![](SocialMediaAnalysis_files/figure-gfm/histograms2-1.png)<!-- -->
+
+For histogram, we can see the distribution of the number of videos. If
+we have majority of count on the left side and less count on right side,
+it may have a right skewed distribution. It indicates that most of
+articles have small number of videos. If we have majority of count on
+the right side and less count on left side, it may have a left skewed
+distribution. It indicates that most of articles have large number of
+videos. If we see a bell shape, it may have a symmetric distribution. It
+indicates that the number of videos are approximately normally
+distributed.
+
+``` r
+ggplot(train, aes(x = is_weekend, y = shares)) +
+geom_point(aes(color = is_weekend), position = "jitter") + scale_color_discrete(name = "is_weekend") +
+  ggtitle("Jitter Plot of shares in weekend/non-weekend") + xlab("is_weekend")
+```
+
+![](SocialMediaAnalysis_files/figure-gfm/jtplot-1.png)<!-- -->
+
+We can generate a jitter plot showing the spread of shares data among
+weekend days and non-weekend days.
 
 ``` r
 # Create scatter plot of response "shares" and predictor "n_tokens_content".
@@ -170,6 +262,27 @@ number of words in the content to be shared more often. If we see a
 negative trend then articles with more number of words in the content
 tend to be shared less often.
 
+``` r
+# Create scatter plot of response "shares" and predictor "num_imgs".
+# Filled with predictor "is_weekend"
+g <- ggplot(data = train, aes(x = num_imgs, y = shares))
+g + geom_point(aes(color = is_weekend)) +
+  geom_smooth(method = "lm") +
+  labs(x = "Number of Images",
+       y = "Number of Shares",
+       title = "Scatter Plot of Shares vs Number of images") + 
+  scale_color_discrete(name = "Weekend Published", labels = c("No", "Yes"))
+```
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](SocialMediaAnalysis_files/figure-gfm/scatterplot2-1.png)<!-- -->
+
+We can also inspect the trend of shares as a function of the number of
+images. If the points show an upward trend, then articles with more
+images would be shared more often. If we see a negative trend then
+articles with more images tend to be shared less often.
+
 # Modeling
 
 ## Linear Regression
@@ -192,6 +305,7 @@ forward_mod <- step(mod, direction = "forward")
     ##     global_subjectivity + is_weekend)^2
 
 ``` r
+# Model fit
 lmfit1 <- train(shares ~ (n_tokens_content + num_imgs + num_videos + 
                          global_rate_positive_words + global_subjectivity + 
                          is_weekend)^2,
@@ -209,15 +323,16 @@ lmfit1
     ## 
     ## Pre-processing: centered (21), scaled (21) 
     ## Resampling: Cross-Validated (5 fold) 
-    ## Summary of sample sizes: 1302, 1303, 1303, 1302, 1302 
+    ## Summary of sample sizes: 1303, 1302, 1303, 1302, 1302 
     ## Resampling results:
     ## 
     ##   RMSE      Rsquared    MAE     
-    ##   4712.735  0.01233963  2553.715
+    ##   4633.874  0.01214954  2568.293
     ## 
     ## Tuning parameter 'intercept' was held constant at a value of TRUE
 
 ``` r
+# Compute the RMSE, Rsquared, and MAE for comparison
 lmpred1 <- predict(lmfit1, newdata = test) 
 lm1 <- postResample(lmpred1, test$shares)
 lm1
@@ -227,6 +342,7 @@ lm1
     ## 7.058904e+03 4.129691e-03 2.880580e+03
 
 ``` r
+# Model fit
 lmfit2 <- train(shares ~ n_tokens_content + num_imgs + num_videos + 
                          global_rate_positive_words + global_subjectivity + 
                          is_weekend,
@@ -244,15 +360,16 @@ lmfit2
     ## 
     ## Pre-processing: centered (6), scaled (6) 
     ## Resampling: Cross-Validated (5 fold) 
-    ## Summary of sample sizes: 1302, 1303, 1302, 1302, 1303 
+    ## Summary of sample sizes: 1302, 1303, 1303, 1302, 1302 
     ## Resampling results:
     ## 
     ##   RMSE      Rsquared     MAE     
-    ##   4744.656  0.006159736  2542.359
+    ##   4689.046  0.008897626  2533.464
     ## 
     ## Tuning parameter 'intercept' was held constant at a value of TRUE
 
 ``` r
+# Compute the RMSE, Rsquared, and MAE for comparison
 lmpred2 <- predict(lmfit2, newdata = test) 
 lm2 <- postResample(lmpred2, test$shares)
 lm2
@@ -280,6 +397,7 @@ instead of using all predictors. It may make bagged trees predictions
 more correlated, which can help with reduction of variation.
 
 ``` r
+# Fit Random Forest Regression Tree
 rffit <- train(shares ~ n_tokens_content + num_imgs + num_videos + 
                          global_rate_positive_words + global_subjectivity + 
                          is_weekend, 
@@ -301,26 +419,27 @@ rffit
     ## Summary of sample sizes: 1303, 1303, 1302, 1302, 1302 
     ## Resampling results across tuning parameters:
     ## 
-    ##   mtry  RMSE      Rsquared    MAE     
-    ##   1     4733.677  0.01402371  2522.230
-    ##   2     4791.911  0.01515585  2595.477
-    ##   3     4819.053  0.01271296  2626.040
-    ##   4     4831.925  0.01287163  2639.185
-    ##   5     4848.970  0.01315485  2663.186
-    ##   6     4858.789  0.01308495  2668.930
+    ##   mtry  RMSE      Rsquared     MAE     
+    ##   1     4690.076  0.016822457  2500.001
+    ##   2     4774.141  0.011384404  2583.291
+    ##   3     4833.356  0.008513320  2642.601
+    ##   4     4850.752  0.007574916  2663.583
+    ##   5     4879.793  0.005935222  2681.162
+    ##   6     4918.241  0.005730823  2712.131
     ## 
     ## RMSE was used to select the optimal model using the
     ##  smallest value.
     ## The final value used for the model was mtry = 1.
 
 ``` r
+# Compute the RMSE, Rsquared, and MAE for comparison
 rfpred <- predict(rffit, newdata = test) 
 rf <- postResample(rfpred, test$shares)
 rf
 ```
 
     ##         RMSE     Rsquared          MAE 
-    ## 6.979104e+03 4.657803e-03 2.797035e+03
+    ## 6.977618e+03 4.905762e-03 2.786037e+03
 
 ## Boosted Tree
 
@@ -337,6 +456,7 @@ terminal nodes) treating the residuals as response
 5. Update residuals for new predictions and repeat B times
 
 ``` r
+# Fit Boosted Regression Tree
 boostedTfit <- train(shares ~ n_tokens_content + num_imgs + num_videos + 
                          global_rate_positive_words + global_subjectivity + 
                          is_weekend, 
@@ -359,30 +479,30 @@ boostedTfit
     ## 
     ## Pre-processing: centered (6), scaled (6) 
     ## Resampling: Cross-Validated (5 fold) 
-    ## Summary of sample sizes: 1302, 1303, 1303, 1302, 1302 
+    ## Summary of sample sizes: 1302, 1303, 1302, 1302, 1303 
     ## Resampling results across tuning parameters:
     ## 
     ##   interaction.depth  n.trees  RMSE      Rsquared    MAE     
-    ##   1                   25      4659.934  0.01029793  2525.041
-    ##   1                   50      4651.561  0.01284836  2520.372
-    ##   1                  100      4644.652  0.01551702  2505.630
-    ##   1                  150      4642.248  0.01797700  2505.679
-    ##   1                  200      4646.915  0.01808770  2504.832
-    ##   2                   25      4640.214  0.01978086  2510.338
-    ##   2                   50      4653.636  0.01744219  2508.748
-    ##   2                  100      4682.617  0.01976049  2541.202
-    ##   2                  150      4705.703  0.01994526  2560.938
-    ##   2                  200      4730.972  0.02076112  2588.102
-    ##   3                   25      4643.710  0.02395573  2502.624
-    ##   3                   50      4670.813  0.02070700  2514.160
-    ##   3                  100      4730.472  0.01976353  2562.115
-    ##   3                  150      4770.928  0.01680733  2591.788
-    ##   3                  200      4803.710  0.01561614  2639.840
-    ##   4                   25      4633.340  0.02392486  2495.215
-    ##   4                   50      4676.955  0.02202082  2526.806
-    ##   4                  100      4780.339  0.01348942  2608.422
-    ##   4                  150      4843.461  0.01089885  2670.320
-    ##   4                  200      4879.576  0.01095484  2714.052
+    ##   1                   25      4729.324  0.01107588  2523.174
+    ##   1                   50      4713.157  0.01647916  2527.904
+    ##   1                  100      4705.333  0.01945254  2487.427
+    ##   1                  150      4700.948  0.02074949  2497.897
+    ##   1                  200      4704.768  0.02051665  2496.510
+    ##   2                   25      4690.856  0.02627127  2512.099
+    ##   2                   50      4698.778  0.02368145  2513.360
+    ##   2                  100      4729.644  0.02290239  2531.776
+    ##   2                  150      4754.693  0.02276374  2547.367
+    ##   2                  200      4779.391  0.02220647  2582.316
+    ##   3                   25      4682.592  0.03097280  2490.417
+    ##   3                   50      4697.116  0.02739755  2502.372
+    ##   3                  100      4753.456  0.02160484  2521.814
+    ##   3                  150      4799.140  0.02006565  2566.859
+    ##   3                  200      4842.147  0.01661138  2603.496
+    ##   4                   25      4704.370  0.02198387  2490.145
+    ##   4                   50      4722.759  0.02652520  2514.365
+    ##   4                  100      4790.474  0.02048590  2572.636
+    ##   4                  150      4852.562  0.02023116  2653.837
+    ##   4                  200      4924.960  0.01597918  2724.959
     ## 
     ## Tuning parameter 'shrinkage' was held constant at a value of
     ##  0.1
@@ -391,17 +511,22 @@ boostedTfit
     ## RMSE was used to select the optimal model using the
     ##  smallest value.
     ## The final values used for the model were n.trees =
-    ##  25, interaction.depth = 4, shrinkage = 0.1 and n.minobsinnode
+    ##  25, interaction.depth = 3, shrinkage = 0.1 and n.minobsinnode
     ##  = 10.
 
 ``` r
+# Compute the RMSE, Rsquared, and MAE for comparison
 boostedpre <- predict(boostedTfit, newdata = test) 
 boosted <- postResample(boostedpre, test$shares)
 boosted
 ```
 
     ##         RMSE     Rsquared          MAE 
-    ## 6.966031e+03 8.409261e-03 2.804476e+03
+    ## 6.987280e+03 3.421941e-03 2.819025e+03
+
+After fitting these different models, we want to declare the best model
+by comparing their RMSEs: the model with smallest RMSE is the best
+model.
 
 ``` r
 allRMSE <- tibble(lm1[1], lm2[1], rf[1], boosted[1])
@@ -414,9 +539,9 @@ RMSE_sort[1,]
 ```
 
     ## # A tibble: 1 × 2
-    ##   Model        RMSE
-    ##   <chr>       <dbl>
-    ## 1 BoostedTree 6966.
+    ##   Model         RMSE
+    ##   <chr>        <dbl>
+    ## 1 RandomForest 6978.
 
 The result is the best model and its RMSE.
 
@@ -441,4 +566,10 @@ apply(reports, MARGIN = 1, FUN = function(x) {
                     params = x[[2]], 
                     output_options = list(html_preview = FALSE)) 
 })
+```
+
+# Render Code for Single Channel
+
+``` r
+rmarkdown::render("ST558_Project2_Group10.Rmd", output_file = "lifestyle.html", params = list(Channels = 'data_channel_is_bus'))
 ```

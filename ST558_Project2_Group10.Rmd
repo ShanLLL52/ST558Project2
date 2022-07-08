@@ -14,10 +14,6 @@ library(ggplot2)
 library(tibble)
 ```
 
-```{r render, echo=TRUE, eval=FALSE}
-rmarkdown::render("ST558_Project2_Group10.Rmd", output_file = "lifestyle.html", params = list(Channels = 'data_channel_is_bus'))
-```
-
 # Introduction
 
 We are trying to predict the number of shares in social networks using predictive models among different data channels. The data set we have is the Online News Popularity Data Set, which summarizes a heterogeneous set of features about articles published by Mashable in two years.
@@ -148,7 +144,7 @@ g + geom_point(aes(color = is_weekend)) +
 
 We can inspect the trend of shares as a function of the number of words in content. If the points show an upward trend, then articles with more number of words in the content to be shared more often. If we see a negative trend then articles with more number of words in the content tend to be shared less often.
 
-```{r scatterplot, echo=TRUE, eval=TRUE}
+```{r scatterplot2, echo=TRUE, eval=TRUE}
 # Create scatter plot of response "shares" and predictor "num_imgs".
 # Filled with predictor "is_weekend"
 g <- ggplot(data = train, aes(x = num_imgs, y = shares))
@@ -175,7 +171,7 @@ mod <- lm(shares ~ (n_tokens_content + num_imgs + num_videos +
                       is_weekend)^2 ,data =  train)
 # Use forward selection to  choose model
 forward_mod <- step(mod, direction = "forward")
-
+# Model fit
 lmfit1 <- train(shares ~ (n_tokens_content + num_imgs + num_videos + 
                          global_rate_positive_words + global_subjectivity + 
                          is_weekend)^2,
@@ -184,13 +180,14 @@ lmfit1 <- train(shares ~ (n_tokens_content + num_imgs + num_videos +
              preProcess = c("center", "scale"),
              trControl = trainControl(method = "cv", number = 5))
 lmfit1
-
+# Compute the RMSE, Rsquared, and MAE for comparison
 lmpred1 <- predict(lmfit1, newdata = test) 
 lm1 <- postResample(lmpred1, test$shares)
 lm1
 ```
 
 ```{r second linear regression, echo=TRUE, eval=TRUE}
+# Model fit
 lmfit2 <- train(shares ~ n_tokens_content + num_imgs + num_videos + 
                          global_rate_positive_words + global_subjectivity + 
                          is_weekend,
@@ -199,6 +196,7 @@ lmfit2 <- train(shares ~ n_tokens_content + num_imgs + num_videos +
              preProcess = c("center", "scale"),
              trControl = trainControl(method = "cv", number = 5))
 lmfit2
+# Compute the RMSE, Rsquared, and MAE for comparison
 lmpred2 <- predict(lmfit2, newdata = test) 
 lm2 <- postResample(lmpred2, test$shares)
 lm2
@@ -215,6 +213,7 @@ For Bootstrap Aggregation(Bagged) for regression tree, we create a bootstrap sam
 Random forest follows Bootstrap Aggregation idea. We will create multiple trees from bootstrap samples and average the results. But, we will use a random subset of predictors for each bootstrap tree fit instead of using all predictors. It may make bagged trees predictions more correlated, which can help with reduction of variation.  
 
 ```{r random forest, echo=TRUE, eval=TRUE}
+# Fit Random Forest Regression Tree
 rffit <- train(shares ~ n_tokens_content + num_imgs + num_videos + 
                          global_rate_positive_words + global_subjectivity + 
                          is_weekend, 
@@ -224,6 +223,7 @@ rffit <- train(shares ~ n_tokens_content + num_imgs + num_videos +
                preProcess = c("center", "scale"),
                tuneGrid = data.frame(mtry = 1:6))
 rffit
+# Compute the RMSE, Rsquared, and MAE for comparison
 rfpred <- predict(rffit, newdata = test) 
 rf <- postResample(rfpred, test$shares)
 rf
@@ -241,6 +241,7 @@ The process of boosted tree:
 5. Update residuals for new predictions and repeat B times  
 
 ```{r boosted tree, echo=TRUE, eval=TRUE}
+# Fit Boosted Regression Tree
 boostedTfit <- train(shares ~ n_tokens_content + num_imgs + num_videos + 
                          global_rate_positive_words + global_subjectivity + 
                          is_weekend, 
@@ -254,6 +255,7 @@ boostedTfit <- train(shares ~ n_tokens_content + num_imgs + num_videos +
                                                  n.minobsinnode = 10)),
                verbose = FALSE)
 boostedTfit
+# Compute the RMSE, Rsquared, and MAE for comparison
 boostedpre <- predict(boostedTfit, newdata = test) 
 boosted <- postResample(boostedpre, test$shares)
 boosted
@@ -296,3 +298,8 @@ apply(reports, MARGIN = 1, FUN = function(x) {
 })
 ```
 
+# Render Code for Single Channel  
+
+```{r render, echo=TRUE, eval=FALSE}
+rmarkdown::render("ST558_Project2_Group10.Rmd", output_file = "lifestyle.html", params = list(Channels = 'data_channel_is_bus'))
+```

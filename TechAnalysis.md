@@ -3,11 +3,36 @@ ST558 Project2
 Shan Luo, Chengxi Zhou
 2022-07-03
 
-``` r
-rmarkdown::render("ST558_Project2_Group10.Rmd", output_file = "lifestyle.html", params = list(Channels = 'data_channel_is_bus'))
-```
-
 # Introduction
+
+We are trying to predict the number of shares in social networks using
+predictive models among different data channels. The data set we have is
+the Online News Popularity Data Set, which summarizes a heterogeneous
+set of features about articles published by Mashable in two years.
+
+Since the number of shares is our target variable, the dependent
+variable in models would be **shares**.
+
+Intuitively, the *number of words in the content*, *number of images*,
+*number of videos*, *rate of positive words in the content*, *text
+subjectivity* and *whether published on the weekend or not* would affect
+the number of shares, so we choose **n_tokens_content**, **num_imgs**,
+**num_videos**, **global_rate_positive_words**, **global_subjectivity**
+and **is_weekend** to be the independent variables.
+
+We also take the article categories into our consideration: the effects
+of variables mentioned above may vary on different types of articles. In
+order to study that, we could subset the data into each levels of
+article types before modeling. There exists six types in our data set:
+lifestyle, entertainment, bus, socmed, tech and world.
+
+As we want to investigate the effect of these independent variables on
+the number of shares, the first step would be presenting a brief EDA to
+have a preliminary understanding of data, then modeling data with
+predictive models and compare them.
+
+The predictive models we choose are linear regression model and ensemble
+tree-based models, which we’ll describe more later.
 
 ``` r
 # Read in data and subset data
@@ -16,8 +41,27 @@ News <- News %>%
   filter(!!rlang::sym(params$Channels) == 1) %>%
   select(shares, n_tokens_content, num_imgs, num_videos,
          global_rate_positive_words, global_subjectivity, is_weekend)
+
+# convert the is_weekend variable to a factor
 News$is_weekend <- factor(News$is_weekend)
+News
 ```
+
+    ## # A tibble: 7,346 × 7
+    ##    shares n_tokens_content num_imgs num_videos global_rate_posit…
+    ##     <dbl>            <dbl>    <dbl>      <dbl>              <dbl>
+    ##  1    505             1072       20          0             0.0746
+    ##  2    855              370        0          0             0.0297
+    ##  3    891              989       20          0             0.0839
+    ##  4   3600               97        0          0             0.0309
+    ##  5  17100             1207       42          0             0.0696
+    ##  6   2800             1248       20          0             0.0681
+    ##  7    445             1154       20          0             0.0745
+    ##  8    783              266        1          0             0.0113
+    ##  9   1500              331        1          0             0.0604
+    ## 10   1800             1225       28          0             0.0645
+    ## # … with 7,336 more rows, and 2 more variables:
+    ## #   global_subjectivity <dbl>, is_weekend <fct>
 
 ``` r
 # Split train and test data
@@ -114,12 +158,26 @@ table(train$is_weekend)
 From the contingency table, we can see how many articles are published
 on weekday and weekend.
 
+``` r
+# Create contingency table of predictor "num_videos"
+table(train$num_videos)
+```
+
+    ## 
+    ##    0    1    2    3    4    5    6    7    8    9   10   11   17 
+    ## 3680 1125  238   35   14    6   10    7    3    9    9    6    1 
+    ##   59   73 
+    ##    1    1
+
+From the contingency table, we can see the number of articles with
+different amount of videos.
+
 ## Bar Plot
 
 ``` r
 # Create bar plot of predictor "is_weekend"
 g <- ggplot(data = train, aes(x = is_weekend))
-g + geom_bar(fill = "Red", color = "Blue") +
+g + geom_bar(fill = "cyan2") +
   labs(title = "Bar Plot of is_weekend")
 ```
 
@@ -146,7 +204,39 @@ articles have small number of shares. If we have majority of count on
 the right side and less count on left side, it may have a left skewed
 distribution. It indicates that most of articles have large number of
 shares. If we see a bell shape, it may have a symmetric distribution. It
-indicating most of articles have relatively large shares.
+indicates that most of articles have relatively large shares.
+
+``` r
+# Create histogram of response "num_videos" and fill with predictor "is_weekend"
+g <- ggplot(data = train, aes(x = num_videos))
+g + geom_histogram(bins = 30, aes(fill = is_weekend)) +
+  labs(x = "Number of Videos",
+       title = "Histogram of Number of Videos") +
+  scale_fill_discrete(name = "Weekend Published", labels = c("No", "Yes"))
+```
+
+![](TechAnalysis_files/figure-gfm/histograms2-1.png)<!-- -->
+
+For histogram, we can see the distribution of the number of videos. If
+we have majority of count on the left side and less count on right side,
+it may have a right skewed distribution. It indicates that most of
+articles have small number of videos. If we have majority of count on
+the right side and less count on left side, it may have a left skewed
+distribution. It indicates that most of articles have large number of
+videos. If we see a bell shape, it may have a symmetric distribution. It
+indicates that the number of videos are approximately normally
+distributed.
+
+``` r
+ggplot(train, aes(x = is_weekend, y = shares)) +
+geom_point(aes(color = is_weekend), position = "jitter") + scale_color_discrete(name = "is_weekend") +
+  ggtitle("Jitter Plot of shares in weekend/non-weekend") + xlab("is_weekend")
+```
+
+![](TechAnalysis_files/figure-gfm/jtplot-1.png)<!-- -->
+
+We can generate a jitter plot showing the spread of shares data among
+weekend days and non-weekend days.
 
 ``` r
 # Create scatter plot of response "shares" and predictor "n_tokens_content".
@@ -170,6 +260,27 @@ number of words in the content to be shared more often. If we see a
 negative trend then articles with more number of words in the content
 tend to be shared less often.
 
+``` r
+# Create scatter plot of response "shares" and predictor "num_imgs".
+# Filled with predictor "is_weekend"
+g <- ggplot(data = train, aes(x = num_imgs, y = shares))
+g + geom_point(aes(color = is_weekend)) +
+  geom_smooth(method = "lm") +
+  labs(x = "Number of Images",
+       y = "Number of Shares",
+       title = "Scatter Plot of Shares vs Number of images") + 
+  scale_color_discrete(name = "Weekend Published", labels = c("No", "Yes"))
+```
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](TechAnalysis_files/figure-gfm/scatterplot2-1.png)<!-- -->
+
+We can also inspect the trend of shares as a function of the number of
+images. If the points show an upward trend, then articles with more
+images would be shared more often. If we see a negative trend then
+articles with more images tend to be shared less often.
+
 # Modeling
 
 ## Linear Regression
@@ -192,6 +303,7 @@ forward_mod <- step(mod, direction = "forward")
     ##     global_subjectivity + is_weekend)^2
 
 ``` r
+# Model fit
 lmfit1 <- train(shares ~ (n_tokens_content + num_imgs + num_videos + 
                          global_rate_positive_words + global_subjectivity + 
                          is_weekend)^2,
@@ -212,12 +324,13 @@ lmfit1
     ## Summary of sample sizes: 4117, 4116, 4116, 4115, 4116 
     ## Resampling results:
     ## 
-    ##   RMSE     Rsquared     MAE     
-    ##   8386.67  0.004413032  2660.438
+    ##   RMSE      Rsquared     MAE    
+    ##   8418.688  0.007319055  2675.58
     ## 
     ## Tuning parameter 'intercept' was held constant at a value of TRUE
 
 ``` r
+# Compute the RMSE, Rsquared, and MAE for comparison
 lmpred1 <- predict(lmfit1, newdata = test) 
 lm1 <- postResample(lmpred1, test$shares)
 lm1
@@ -227,6 +340,7 @@ lm1
     ## 4.531826e+03 2.573664e-03 2.461080e+03
 
 ``` r
+# Model fit
 lmfit2 <- train(shares ~ n_tokens_content + num_imgs + num_videos + 
                          global_rate_positive_words + global_subjectivity + 
                          is_weekend,
@@ -253,6 +367,7 @@ lmfit2
     ## Tuning parameter 'intercept' was held constant at a value of TRUE
 
 ``` r
+# Compute the RMSE, Rsquared, and MAE for comparison
 lmpred2 <- predict(lmfit2, newdata = test) 
 lm2 <- postResample(lmpred2, test$shares)
 lm2
@@ -280,6 +395,7 @@ instead of using all predictors. It may make bagged trees predictions
 more correlated, which can help with reduction of variation.
 
 ``` r
+# Fit Random Forest Regression Tree
 rffit <- train(shares ~ n_tokens_content + num_imgs + num_videos + 
                          global_rate_positive_words + global_subjectivity + 
                          is_weekend, 
@@ -314,6 +430,7 @@ rffit
     ## The final value used for the model was mtry = 1.
 
 ``` r
+# Compute the RMSE, Rsquared, and MAE for comparison
 rfpred <- predict(rffit, newdata = test) 
 rf <- postResample(rfpred, test$shares)
 rf
@@ -337,6 +454,7 @@ terminal nodes) treating the residuals as response
 5. Update residuals for new predictions and repeat B times
 
 ``` r
+# Fit Boosted Regression Tree
 boostedTfit <- train(shares ~ n_tokens_content + num_imgs + num_videos + 
                          global_rate_positive_words + global_subjectivity + 
                          is_weekend, 
@@ -395,6 +513,7 @@ boostedTfit
     ##  = 10.
 
 ``` r
+# Compute the RMSE, Rsquared, and MAE for comparison
 boostedpre <- predict(boostedTfit, newdata = test) 
 boosted <- postResample(boostedpre, test$shares)
 boosted
@@ -402,6 +521,10 @@ boosted
 
     ##         RMSE     Rsquared          MAE 
     ## 4.442609e+03 2.685812e-04 2.313039e+03
+
+After fitting these different models, we want to declare the best model
+by comparing their RMSEs: the model with smallest RMSE is the best
+model.
 
 ``` r
 allRMSE <- tibble(lm1[1], lm2[1], rf[1], boosted[1])
@@ -441,4 +564,10 @@ apply(reports, MARGIN = 1, FUN = function(x) {
                     params = x[[2]], 
                     output_options = list(html_preview = FALSE)) 
 })
+```
+
+# Render Code for Single Channel
+
+``` r
+rmarkdown::render("ST558_Project2_Group10.Rmd", output_file = "lifestyle.html", params = list(Channels = 'data_channel_is_bus'))
 ```
