@@ -34,6 +34,8 @@ predictive models and compare them.
 The predictive models we choose are linear regression model and ensemble
 tree-based models, which we’ll describe more later.
 
+# Data
+
 ``` r
 # Read in data and subset data
 News <- read_csv("OnlineNewsPopularity.csv", show_col_types = FALSE) 
@@ -186,6 +188,8 @@ g + geom_bar(fill = "cyan2") +
 From the bar plot, we can see how many articles are published on weekday
 and weekend and visualize the difference.
 
+## Histogram
+
 ``` r
 # Create histogram of response "shares" and fill with predictor "is_weekend"
 g <- ggplot(data = train, aes(x = shares))
@@ -227,6 +231,8 @@ videos. If we see a bell shape, it may have a symmetric distribution. It
 indicates that the number of videos are approximately normally
 distributed.
 
+## Jitter Plot
+
 ``` r
 ggplot(train, aes(x = is_weekend, y = shares)) +
 geom_point(aes(color = is_weekend), position = "jitter") + scale_color_discrete(name = "is_weekend") +
@@ -237,6 +243,8 @@ geom_point(aes(color = is_weekend), position = "jitter") + scale_color_discrete(
 
 We can generate a jitter plot showing the spread of shares data among
 weekend days and non-weekend days.
+
+## Scatter Plot
 
 ``` r
 # Create scatter plot of response "shares" and predictor "n_tokens_content".
@@ -522,6 +530,8 @@ boosted
     ##         RMSE     Rsquared          MAE 
     ## 1.047477e+04 3.759427e-03 3.576166e+03
 
+# Model Comparison
+
 After fitting these different models, we want to declare the best model
 by comparing their RMSEs: the model with smallest RMSE is the best
 model.
@@ -557,6 +567,7 @@ params <- lapply(channels, FUN = function(x){
 })
 # Put into a data frame
 reports <- tibble::tibble(output_file, params)
+# Automation
 apply(reports, MARGIN = 1, FUN = function(x) {
   rmarkdown::render(input = "ST558_Project2_Group10.Rmd", 
                     output_format = "github_document", 
@@ -569,5 +580,8 @@ apply(reports, MARGIN = 1, FUN = function(x) {
 # Render Code for Single Channel
 
 ``` r
-rmarkdown::render("ST558_Project2_Group10.Rmd", output_file = "lifestyle.html", params = list(Channels = 'data_channel_is_bus'))
+rmarkdown::render(input = "ST558_Project2_Group10.Rmd", 
+                  output_file = "BusinessAnalysis.md", 
+                  output_format = "github_document",
+                  params = list(Channels = 'data_channel_is_bus'))
 ```

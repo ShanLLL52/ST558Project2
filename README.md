@@ -33,6 +33,7 @@ params <- lapply(channels, FUN = function(x){
 })
 # Put into a data frame
 reports <- tibble::tibble(output_file, params)
+# Automation
 apply(reports, MARGIN = 1, FUN = function(x) {
   rmarkdown::render(input = "ST558_Project2_Group10.Rmd", 
                     output_format = "github_document", 
