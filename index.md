@@ -1,4 +1,10 @@
-## Welcome to GitHub Pages
+## ST558 Project2 Group 10 
+
+# Author: Shan Luo, Chengxi Zhou
+
+# README
+
+[`README`](README.md)
 
 You can use the [editor on GitHub](https://github.com/ShanLLL52/ST558Project2/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
 
