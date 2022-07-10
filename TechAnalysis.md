@@ -49,6 +49,21 @@ News$is_weekend <- factor(News$is_weekend)
 News
 ```
 
+    ## # A tibble: 7,346 × 7
+    ##    shares n_tokens_content num_imgs num_videos global_rate_positive_words global_subjectivity is_weekend
+    ##     <dbl>            <dbl>    <dbl>      <dbl>                      <dbl>               <dbl> <fct>     
+    ##  1    505             1072       20          0                     0.0746               0.514 0         
+    ##  2    855              370        0          0                     0.0297               0.437 0         
+    ##  3    891              989       20          0                     0.0839               0.543 0         
+    ##  4   3600               97        0          0                     0.0309               0.539 0         
+    ##  5  17100             1207       42          0                     0.0696               0.539 0         
+    ##  6   2800             1248       20          0                     0.0681               0.507 0         
+    ##  7    445             1154       20          0                     0.0745               0.534 0         
+    ##  8    783              266        1          0                     0.0113               0.313 0         
+    ##  9   1500              331        1          0                     0.0604               0.561 0         
+    ## 10   1800             1225       28          0                     0.0645               0.481 0         
+    ## # … with 7,336 more rows
+
 ``` r
 # Split train and test data
 set.seed(1)
@@ -464,8 +479,7 @@ boostedTfit
     ##   4                  200      8887.758  0.004424285  2573.561
     ## 
     ## Tuning parameter 'shrinkage' was held constant at a value of 0.1
-    ## Tuning parameter 'n.minobsinnode' was held constant at a
-    ##  value of 10
+    ## Tuning parameter 'n.minobsinnode' was held constant at a value of 10
     ## RMSE was used to select the optimal model using the smallest value.
     ## The final values used for the model were n.trees = 25, interaction.depth = 1, shrinkage = 0.1 and n.minobsinnode = 10.
 
@@ -492,8 +506,16 @@ RMSElong <- allRMSE %>%
   pivot_longer(cols = 1:4, names_to = "Model", values_to = "RMSE")
 RMSE_sort <- RMSElong %>% 
   arrange(RMSE)
-RMSE_sort[1,]
 ```
+
+## compare results
+
+``` r
+data.frame(RMSE_sort[1,1],RMSE_sort[1,2])
+```
+
+    ##               Model     RMSE
+    ## 1 LinearRegression2 4321.411
 
 The result is the best model and its RMSE.
 

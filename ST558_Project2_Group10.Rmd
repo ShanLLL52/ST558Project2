@@ -280,9 +280,13 @@ RMSElong <- allRMSE %>%
   pivot_longer(cols = 1:4, names_to = "Model", values_to = "RMSE")
 RMSE_sort <- RMSElong %>% 
   arrange(RMSE)
-RMSE_sort[1,]
 ```
 
+## compare results
+
+```{r comparsion result, echo=TRUE, eval=TRUE}
+data.frame(RMSE_sort[1,1],RMSE_sort[1,2])
+```
 The result is the best model and its RMSE.  
 
 # Automation  

@@ -49,6 +49,21 @@ News$is_weekend <- factor(News$is_weekend)
 News
 ```
 
+    ## # A tibble: 7,057 × 7
+    ##    shares n_tokens_content num_imgs num_videos global_rate_positive_words global_subjectivity is_weekend
+    ##     <dbl>            <dbl>    <dbl>      <dbl>                      <dbl>               <dbl> <fct>     
+    ##  1    593              219        1          0                     0.0457               0.522 0         
+    ##  2   1200              531        1          0                     0.0414               0.430 0         
+    ##  3   2100              194        0          1                     0.0567               0.396 0         
+    ##  4   1200              161        0          6                     0.0497               0.572 0         
+    ##  5   4600              454        1          0                     0.0441               0.467 0         
+    ##  6   1200              177        1          0                     0.0678               0.574 0         
+    ##  7    631              356       12          1                     0.0618               0.436 0         
+    ##  8   1300              281        1          0                     0.0463               0.434 0         
+    ##  9   1700              909        1          1                     0.0649               0.470 0         
+    ## 10    455              413       13          0                     0.0412               0.447 0         
+    ## # … with 7,047 more rows
+
 ``` r
 # Split train and test data
 set.seed(1)
@@ -63,20 +78,13 @@ cor(select(News ,shares, n_tokens_content, num_imgs, num_videos,
            global_rate_positive_words, global_subjectivity))
 ```
 
-    ##                                   shares n_tokens_content    num_imgs    num_videos global_rate_positive_words
-    ## shares                      1.0000000000       0.01122183  0.03809298 -0.0005863698                -0.01844167
-    ## n_tokens_content            0.0112218266       1.00000000  0.45651521  0.2288998392                 0.12416447
-    ## num_imgs                    0.0380929838       0.45651521  1.00000000 -0.0962389701                -0.16224682
-    ## num_videos                 -0.0005863698       0.22889984 -0.09623897  1.0000000000                 0.11218878
-    ## global_rate_positive_words -0.0184416672       0.12416447 -0.16224682  0.1121887841                 1.00000000
-    ## global_subjectivity         0.0375108090       0.12504848 -0.03906866  0.0442863698                 0.45868687
-    ##                            global_subjectivity
-    ## shares                              0.03751081
-    ## n_tokens_content                    0.12504848
-    ## num_imgs                           -0.03906866
-    ## num_videos                          0.04428637
-    ## global_rate_positive_words          0.45868687
-    ## global_subjectivity                 1.00000000
+    ##                                   shares n_tokens_content    num_imgs    num_videos global_rate_positive_words global_subjectivity
+    ## shares                      1.0000000000       0.01122183  0.03809298 -0.0005863698                -0.01844167          0.03751081
+    ## n_tokens_content            0.0112218266       1.00000000  0.45651521  0.2288998392                 0.12416447          0.12504848
+    ## num_imgs                    0.0380929838       0.45651521  1.00000000 -0.0962389701                -0.16224682         -0.03906866
+    ## num_videos                 -0.0005863698       0.22889984 -0.09623897  1.0000000000                 0.11218878          0.04428637
+    ## global_rate_positive_words -0.0184416672       0.12416447 -0.16224682  0.1121887841                 1.00000000          0.45868687
+    ## global_subjectivity         0.0375108090       0.12504848 -0.03906866  0.0442863698                 0.45868687          1.00000000
 
 If two variables have high correlation, we may think about removing one
 of them.
@@ -129,10 +137,10 @@ table(train$num_videos)
 ```
 
     ## 
-    ##    0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22   23   24 
-    ## 2169 1577  427  123   71   37   26   23   23   28   34   34   24   29   25   21   20   12    7    1   14   26   14    3    5 
-    ##   25   26   27   28   29   31   32   33   34   35   36   38   46   50   53   58   59   65   73   74 
-    ##   47   62   16    5    3    1    4   10    2    3    1    2    1    2    1    2    1    1    2    2
+    ##    0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22   23   24   25   26 
+    ## 2169 1577  427  123   71   37   26   23   23   28   34   34   24   29   25   21   20   12    7    1   14   26   14    3    5   47   62 
+    ##   27   28   29   31   32   33   34   35   36   38   46   50   53   58   59   65   73   74 
+    ##   16    5    3    1    4   10    2    3    1    2    1    2    1    2    1    1    2    2
 
 From the contingency table, we can see the number of articles with
 different amount of videos.
@@ -473,8 +481,7 @@ boostedTfit
     ##   4                  200      7465.263  0.003688769  3031.441
     ## 
     ## Tuning parameter 'shrinkage' was held constant at a value of 0.1
-    ## Tuning parameter 'n.minobsinnode' was held constant at a
-    ##  value of 10
+    ## Tuning parameter 'n.minobsinnode' was held constant at a value of 10
     ## RMSE was used to select the optimal model using the smallest value.
     ## The final values used for the model were n.trees = 25, interaction.depth = 2, shrinkage = 0.1 and n.minobsinnode = 10.
 
@@ -501,8 +508,16 @@ RMSElong <- allRMSE %>%
   pivot_longer(cols = 1:4, names_to = "Model", values_to = "RMSE")
 RMSE_sort <- RMSElong %>% 
   arrange(RMSE)
-RMSE_sort[1,]
 ```
+
+## compare results
+
+``` r
+data.frame(RMSE_sort[1,1],RMSE_sort[1,2])
+```
+
+    ##          Model     RMSE
+    ## 1 RandomForest 8757.098
 
 The result is the best model and its RMSE.
 

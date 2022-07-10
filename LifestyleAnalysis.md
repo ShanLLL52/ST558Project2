@@ -49,6 +49,21 @@ News$is_weekend <- factor(News$is_weekend)
 News
 ```
 
+    ## # A tibble: 2,099 × 7
+    ##    shares n_tokens_content num_imgs num_videos global_rate_positive_words global_subjectivity is_weekend
+    ##     <dbl>            <dbl>    <dbl>      <dbl>                      <dbl>               <dbl> <fct>     
+    ##  1    556              960       20          0                     0.0802               0.514 0         
+    ##  2   1900              187        1          0                     0.0267               0.477 0         
+    ##  3   5700              103        1          0                     0.0291               0.424 0         
+    ##  4    462              243        0          0                     0.0494               0.518 0         
+    ##  5   3600              204        1          0                     0.0735               0.652 0         
+    ##  6    343              315        1          0                     0.0349               0.554 0         
+    ##  7    507             1190       20          0                     0.0639               0.507 0         
+    ##  8    552              374        1          0                     0.0374               0.399 0         
+    ##  9   1200              499        1          0                     0.0281               0.395 0         
+    ## 10   1900              223        0          0                     0.0493               0.372 0         
+    ## # … with 2,089 more rows
+
 ``` r
 # Split train and test data
 set.seed(1)
@@ -63,20 +78,13 @@ cor(select(News ,shares, n_tokens_content, num_imgs, num_videos,
            global_rate_positive_words, global_subjectivity))
 ```
 
-    ##                                  shares n_tokens_content    num_imgs    num_videos global_rate_positive_words
-    ## shares                      1.000000000       0.07302425  0.05120130  0.0883110588              -0.0053957870
-    ## n_tokens_content            0.073024252       1.00000000  0.46442622  0.0400571423               0.1277957592
-    ## num_imgs                    0.051201300       0.46442622  1.00000000 -0.0550097529               0.0691482967
-    ## num_videos                  0.088311059       0.04005714 -0.05500975  1.0000000000              -0.0000483498
-    ## global_rate_positive_words -0.005395787       0.12779576  0.06914830 -0.0000483498               1.0000000000
-    ## global_subjectivity         0.017739883       0.09117454  0.19925466  0.0254110044               0.3833653985
-    ##                            global_subjectivity
-    ## shares                              0.01773988
-    ## n_tokens_content                    0.09117454
-    ## num_imgs                            0.19925466
-    ## num_videos                          0.02541100
-    ## global_rate_positive_words          0.38336540
-    ## global_subjectivity                 1.00000000
+    ##                                  shares n_tokens_content    num_imgs    num_videos global_rate_positive_words global_subjectivity
+    ## shares                      1.000000000       0.07302425  0.05120130  0.0883110588              -0.0053957870          0.01773988
+    ## n_tokens_content            0.073024252       1.00000000  0.46442622  0.0400571423               0.1277957592          0.09117454
+    ## num_imgs                    0.051201300       0.46442622  1.00000000 -0.0550097529               0.0691482967          0.19925466
+    ## num_videos                  0.088311059       0.04005714 -0.05500975  1.0000000000              -0.0000483498          0.02541100
+    ## global_rate_positive_words -0.005395787       0.12779576  0.06914830 -0.0000483498               1.0000000000          0.38336540
+    ## global_subjectivity         0.017739883       0.09117454  0.19925466  0.0254110044               0.3833653985          1.00000000
 
 If two variables have high correlation, we may think about removing one
 of them.
@@ -471,8 +479,7 @@ boostedTfit
     ##   4                  200      7923.172  0.016897045  3452.889
     ## 
     ## Tuning parameter 'shrinkage' was held constant at a value of 0.1
-    ## Tuning parameter 'n.minobsinnode' was held constant at a
-    ##  value of 10
+    ## Tuning parameter 'n.minobsinnode' was held constant at a value of 10
     ## RMSE was used to select the optimal model using the smallest value.
     ## The final values used for the model were n.trees = 25, interaction.depth = 3, shrinkage = 0.1 and n.minobsinnode = 10.
 
@@ -499,8 +506,16 @@ RMSElong <- allRMSE %>%
   pivot_longer(cols = 1:4, names_to = "Model", values_to = "RMSE")
 RMSE_sort <- RMSElong %>% 
   arrange(RMSE)
-RMSE_sort[1,]
 ```
+
+## compare results
+
+``` r
+data.frame(RMSE_sort[1,1],RMSE_sort[1,2])
+```
+
+    ##         Model     RMSE
+    ## 1 BoostedTree 10474.77
 
 The result is the best model and its RMSE.
 

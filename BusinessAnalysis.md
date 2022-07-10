@@ -49,6 +49,21 @@ News$is_weekend <- factor(News$is_weekend)
 News
 ```
 
+    ## # A tibble: 6,258 × 7
+    ##    shares n_tokens_content num_imgs num_videos global_rate_positive_words global_subjectivity is_weekend
+    ##     <dbl>            <dbl>    <dbl>      <dbl>                      <dbl>               <dbl> <fct>     
+    ##  1    711              255        1          0                     0.0431               0.341 0         
+    ##  2   1500              211        1          0                     0.0569               0.702 0         
+    ##  3   3100              397        1          0                     0.0655               0.374 0         
+    ##  4    852              244        1          0                     0.0164               0.332 0         
+    ##  5    425              723        1          0                     0.0636               0.375 0         
+    ##  6   3200              708        1          1                     0.0551               0.491 0         
+    ##  7    575              142        1          0                     0.0211               0.443 0         
+    ##  8    819              444       23          0                     0.0518               0.462 0         
+    ##  9    732              109        1          0                     0.0917               0.593 0         
+    ## 10   1200              306        1          0                     0.0490               0.395 0         
+    ## # … with 6,248 more rows
+
 ``` r
 # Split train and test data
 set.seed(1)
@@ -122,10 +137,10 @@ table(train$num_videos)
 ```
 
     ## 
-    ##    0    1    2    3    4    5    6    7    8    9   10   11   12   13   15   16   17   19   20   21   23   26   31   65   66 
-    ## 3429  670  127   35   17    8    7    3    4    2   19   18    3    2    2    3    3    2    9    9    2    1    1    1    1 
-    ##   73   74   75 
-    ##    2    1    1
+    ##    0    1    2    3    4    5    6    7    8    9   10   11   12   13   15   16   17   19   20   21   23   26   31   65   66   73   74 
+    ## 3429  670  127   35   17    8    7    3    4    2   19   18    3    2    2    3    3    2    9    9    2    1    1    1    1    2    1 
+    ##   75 
+    ##    1
 
 From the contingency table, we can see the number of articles with
 different amount of videos.
@@ -466,8 +481,7 @@ boostedTfit
     ##   4                  200      17761.14  0.0028038652  3771.275
     ## 
     ## Tuning parameter 'shrinkage' was held constant at a value of 0.1
-    ## Tuning parameter 'n.minobsinnode' was held constant at a
-    ##  value of 10
+    ## Tuning parameter 'n.minobsinnode' was held constant at a value of 10
     ## RMSE was used to select the optimal model using the smallest value.
     ## The final values used for the model were n.trees = 50, interaction.depth = 1, shrinkage = 0.1 and n.minobsinnode = 10.
 
@@ -494,8 +508,16 @@ RMSElong <- allRMSE %>%
   pivot_longer(cols = 1:4, names_to = "Model", values_to = "RMSE")
 RMSE_sort <- RMSElong %>% 
   arrange(RMSE)
-RMSE_sort[1,]
 ```
+
+## compare results
+
+``` r
+data.frame(RMSE_sort[1,1],RMSE_sort[1,2])
+```
+
+    ##               Model     RMSE
+    ## 1 LinearRegression2 6325.338
 
 The result is the best model and its RMSE.
 
