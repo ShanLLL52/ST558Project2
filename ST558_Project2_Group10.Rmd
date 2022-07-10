@@ -1,6 +1,6 @@
 ---
 title: "ST558 Project2"
-author: "Shan Luo, Chengxi Zhou"
+author: "Shan Luo, Chengxi Zou"
 date: '2022-07-03'
 params:
   Channels: 'data_channel_is_bus'

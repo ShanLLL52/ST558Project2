@@ -1,6 +1,6 @@
 ST558 Project2
 ================
-Shan Luo, Chengxi Zhou
+Shan Luo, Chengxi Zou
 2022-07-03
 
 # Introduction
@@ -49,22 +49,6 @@ News$is_weekend <- factor(News$is_weekend)
 News
 ```
 
-    ## # A tibble: 2,323 × 7
-    ##    shares n_tokens_content num_imgs num_videos global_rate_posit…
-    ##     <dbl>            <dbl>    <dbl>      <dbl>              <dbl>
-    ##  1   2600              257        0          1             0.0311
-    ##  2    690              218       11          0             0.0550
-    ##  3   4800             1226        1          1             0.0228
-    ##  4    851             1121        1          0             0.0562
-    ##  5   4800              168       11          0             0.0714
-    ##  6   9200              100        1          0             0.07  
-    ##  7   1600             1596        8          0             0.0533
-    ##  8    775              518        1          0             0.0676
-    ##  9  18200              358        1          0             0.0391
-    ## 10   1600              358        1          0             0.0559
-    ## # … with 2,313 more rows, and 2 more variables:
-    ## #   global_subjectivity <dbl>, is_weekend <fct>
-
 ``` r
 # Split train and test data
 set.seed(1)
@@ -79,34 +63,13 @@ cor(select(News ,shares, n_tokens_content, num_imgs, num_videos,
            global_rate_positive_words, global_subjectivity))
 ```
 
-    ##                                  shares n_tokens_content
-    ## shares                      1.000000000       0.04795934
-    ## n_tokens_content            0.047959339       1.00000000
-    ## num_imgs                   -0.034796518       0.51969089
-    ## num_videos                  0.015893010      -0.01768815
-    ## global_rate_positive_words -0.007225248       0.08783301
-    ## global_subjectivity        -0.007585586       0.11320093
-    ##                               num_imgs  num_videos
-    ## shares                     -0.03479652  0.01589301
-    ## n_tokens_content            0.51969089 -0.01768815
-    ## num_imgs                    1.00000000 -0.10202484
-    ## num_videos                 -0.10202484  1.00000000
-    ## global_rate_positive_words  0.05672248  0.11907336
-    ## global_subjectivity         0.13071261  0.15330875
-    ##                            global_rate_positive_words
-    ## shares                                   -0.007225248
-    ## n_tokens_content                          0.087833012
-    ## num_imgs                                  0.056722478
-    ## num_videos                                0.119073363
-    ## global_rate_positive_words                1.000000000
-    ## global_subjectivity                       0.262903823
-    ##                            global_subjectivity
-    ## shares                            -0.007585586
-    ## n_tokens_content                   0.113200929
-    ## num_imgs                           0.130712612
-    ## num_videos                         0.153308750
-    ## global_rate_positive_words         0.262903823
-    ## global_subjectivity                1.000000000
+    ##                                  shares n_tokens_content    num_imgs  num_videos global_rate_positive_words global_subjectivity
+    ## shares                      1.000000000       0.04795934 -0.03479652  0.01589301               -0.007225248        -0.007585586
+    ## n_tokens_content            0.047959339       1.00000000  0.51969089 -0.01768815                0.087833012         0.113200929
+    ## num_imgs                   -0.034796518       0.51969089  1.00000000 -0.10202484                0.056722478         0.130712612
+    ## num_videos                  0.015893010      -0.01768815 -0.10202484  1.00000000                0.119073363         0.153308750
+    ## global_rate_positive_words -0.007225248       0.08783301  0.05672248  0.11907336                1.000000000         0.262903823
+    ## global_subjectivity        -0.007585586       0.11320093  0.13071261  0.15330875                0.262903823         1.000000000
 
 If two variables have high correlation, we may think about removing one
 of them.
@@ -125,20 +88,13 @@ apply(X = select(train, shares:global_subjectivity), MARGIN = 2,
       })
 ```
 
-    ##           shares n_tokens_content  num_imgs num_videos
-    ## Min        5.000           0.0000  0.000000   0.000000
-    ## Mean    3550.980         605.7150  4.270885   1.068796
-    ## Median  2100.000         435.0000  1.000000   0.000000
-    ## Max    59000.000        4451.0000 62.000000  34.000000
-    ## Sd      4761.087         547.4839  8.280483   3.075399
-    ## IQR     2400.000         509.5000  2.000000   1.000000
-    ##        global_rate_positive_words global_subjectivity
-    ## Min                    0.00000000          0.00000000
-    ## Mean                   0.04661518          0.45895234
-    ## Median                 0.04575603          0.46090987
-    ## Max                    0.15548780          0.92222222
-    ## Sd                     0.01704840          0.09575491
-    ## IQR                    0.02071903          0.10953052
+    ##           shares n_tokens_content  num_imgs num_videos global_rate_positive_words global_subjectivity
+    ## Min        5.000           0.0000  0.000000   0.000000                 0.00000000          0.00000000
+    ## Mean    3550.980         605.7150  4.270885   1.068796                 0.04661518          0.45895234
+    ## Median  2100.000         435.0000  1.000000   0.000000                 0.04575603          0.46090987
+    ## Max    59000.000        4451.0000 62.000000  34.000000                 0.15548780          0.92222222
+    ## Sd      4761.087         547.4839  8.280483   3.075399                 0.01704840          0.09575491
+    ## IQR     2400.000         509.5000  2.000000   1.000000                 0.02071903          0.10953052
 
 From numeric summary table, if one variable’s mean is greater than
 median, it has a right skewed distribution. If the mean is less than
@@ -166,12 +122,10 @@ table(train$num_videos)
 ```
 
     ## 
-    ##    0    1    2    3    4    5    6    7    8    9   10   11   12 
-    ## 1122  252  116   31   13    9    4    6    7    8   15   11    3 
-    ##   13   14   15   16   17   18   19   20   21   24   26   27   28 
-    ##    2    5    3    3    5    3    3    1    1    1    1    1    1 
-    ##   34 
-    ##    1
+    ##    0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   24   26   27 
+    ## 1122  252  116   31   13    9    4    6    7    8   15   11    3    2    5    3    3    5    3    3    1    1    1    1    1 
+    ##   28   34 
+    ##    1    1
 
 From the contingency table, we can see the number of articles with
 different amount of videos.
@@ -435,8 +389,7 @@ rffit
     ##   5     4879.793  0.005935222  2681.162
     ##   6     4918.241  0.005730823  2712.131
     ## 
-    ## RMSE was used to select the optimal model using the
-    ##  smallest value.
+    ## RMSE was used to select the optimal model using the smallest value.
     ## The final value used for the model was mtry = 1.
 
 ``` r
@@ -512,15 +465,11 @@ boostedTfit
     ##   4                  150      4852.562  0.02023116  2653.837
     ##   4                  200      4924.960  0.01597918  2724.959
     ## 
-    ## Tuning parameter 'shrinkage' was held constant at a value of
-    ##  0.1
-    ## Tuning parameter 'n.minobsinnode' was held constant at
-    ##  a value of 10
-    ## RMSE was used to select the optimal model using the
-    ##  smallest value.
-    ## The final values used for the model were n.trees =
-    ##  25, interaction.depth = 3, shrinkage = 0.1 and n.minobsinnode
-    ##  = 10.
+    ## Tuning parameter 'shrinkage' was held constant at a value of 0.1
+    ## Tuning parameter 'n.minobsinnode' was held constant at a
+    ##  value of 10
+    ## RMSE was used to select the optimal model using the smallest value.
+    ## The final values used for the model were n.trees = 25, interaction.depth = 3, shrinkage = 0.1 and n.minobsinnode = 10.
 
 ``` r
 # Compute the RMSE, Rsquared, and MAE for comparison
@@ -547,11 +496,6 @@ RMSE_sort <- RMSElong %>%
   arrange(RMSE)
 RMSE_sort[1,]
 ```
-
-    ## # A tibble: 1 × 2
-    ##   Model         RMSE
-    ##   <chr>        <dbl>
-    ## 1 RandomForest 6978.
 
 The result is the best model and its RMSE.
 
