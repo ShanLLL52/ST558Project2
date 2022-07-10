@@ -1,6 +1,6 @@
 # Group 10
 
-# Author: Shan Luo, Chengxi Zhou
+# Author: Shan Luo, Chengxi Zou
 
 # README
 
