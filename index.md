@@ -1,5 +1,3 @@
-## ST558 Project2 Group 10 
-
 # Author: Shan Luo, Chengxi Zhou
 
 # README
