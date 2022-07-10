@@ -1,6 +1,6 @@
 ST558 Project2 Group10 README
 ================
-Shan Luo, Chengxi Zhou
+Shan Luo, Chengxi Zou
 2022-07-08
 
 This repo is for ST558 Project2. We are trying to use [online new
